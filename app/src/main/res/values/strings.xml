@@ -1,3 +1,27 @@
 <resources>
-    <string name="app_name">tfs_spring_2024_reshetnikov</string>
+    <string name="app_name">tfs24_Reshetnikov</string>
+    <string name="add_random_emoji">Add random emoji</string>
+    <string name="very_long_name">very long name</string>
+    <string name="regular_name">regular name</string>
+    <string name="no_name">no name</string>
+    <string name="very_long_message">very long message</string>
+    <string name="regular_message">regular message</string>
+    <string name="no_message">no message</string>
+    <string name="set_name">set name</string>
+    <string name="desired_name">type in desired name</string>
+    <string name="empty_avatar">empty ava</string>
+    <string name="tiny_avatar">tiny ava</string>
+    <string name="regular_avatar">regular ava</string>
+    <string name="huge_avatar">huge ava</string>
+    <string name="wip_stub">This button works, but it\'s functionality is absent</string>
+    <string name="missing_name">Anonymous</string>
+    <string name="missing_message">(no message)</string>
+
+    <string name="sad_smile">:(</string>
+
+    <string name="example_regular_name">Елена Игнатьева</string>
+    <string name="example_long_name">Абу Абдуллах Мухаммад ибн Муса аль-Хорезми</string>
+
+    <string name="example_regular_message">Привет, как дела?</string>
+    <string name="example_long_message">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</string>
 </resources>
