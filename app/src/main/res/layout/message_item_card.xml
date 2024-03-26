@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ru.elnorte.tfs_spring_2024_reshetnikov.MessageViewGroup xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/message"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="30dp" />

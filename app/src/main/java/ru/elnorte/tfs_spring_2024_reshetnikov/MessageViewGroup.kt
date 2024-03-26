@@ -4,11 +4,12 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.util.TypedValue
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.google.android.material.snackbar.Snackbar
+
 
 class MessageViewGroup @JvmOverloads constructor(
     context: Context,
@@ -17,12 +18,22 @@ class MessageViewGroup @JvmOverloads constructor(
     defTheme: Int = 0,
 ) : ConstraintLayout(context, attributeSet, defStyle, defTheme) {
 
-    init {
-        inflate(context, R.layout.message_viewgroup_layout, this)
-        initializeFlexBox()
+    private lateinit var onEmojiClick: (String) -> Unit
+    private lateinit var onAddReactionClick: () -> Unit
+
+    fun hideAvatar(isHidden: Boolean) {
+        if (isHidden) {
+            findViewById<ImageView>(R.id.avatarImageView).visibility = View.GONE
+        } else {
+            findViewById<ImageView>(R.id.avatarImageView).visibility = View.VISIBLE
+        }
     }
 
-    fun addEmoji(emoji: String, count: Int) {
+    init {
+        inflate(context, R.layout.message_viewgroup_layout, this)
+    }
+
+    private fun addEmoji(emoji: String, count: Int, checked: Boolean) {
         val box = findViewById<FlexBoxLayout>(R.id.reactionFlexBox)
         val mlp =
             MarginLayoutParams(MarginLayoutParams.WRAP_CONTENT, MarginLayoutParams.WRAP_CONTENT)
@@ -54,15 +65,28 @@ class MessageViewGroup @JvmOverloads constructor(
             TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5f, resources.displayMetrics)
                 .toInt()
         )
-        emo.setOnClickListener {
-            if (it.isSelected) {
-                (it as EmojiView).count--
-            } else {
-                (it as EmojiView).count++
-            }
-            it.isSelected = !it.isSelected
+        if (checked) {
+            emo.isSelected = true
         }
-        box.addView(emo, box.childCount - 1)
+        emo.setOnClickListener {
+            onEmojiClick.invoke(emoji)
+        }
+        box.addView(emo)
+    }
+
+    private fun clearEmojis() {
+        findViewById<FlexBoxLayout>(R.id.reactionFlexBox).removeAllViews()
+    }
+
+    fun addEmojis(emojis: Map<String, Int>?, selectedEmoji: String?) {
+        clearEmojis()
+        emojis?.forEach {
+            addEmoji(it.key, it.value, it.key == selectedEmoji)
+        }
+        if (!emojis.isNullOrEmpty()) {
+            initializeFlexBox()
+        }
+
     }
 
     fun setName(name: String?) {
@@ -82,6 +106,14 @@ class MessageViewGroup @JvmOverloads constructor(
                 context, R.drawable.stub_avatar
             )
         )
+    }
+
+    fun setOnEmojiClickListener(lambda: (String) -> Unit) {
+        onEmojiClick = lambda
+    }
+
+    fun setOnAddReactionClickListener(lambda: () -> Unit) {
+        onAddReactionClick = lambda
     }
 
     private fun initializeFlexBox() {
@@ -110,7 +142,7 @@ class MessageViewGroup @JvmOverloads constructor(
         image.background = AppCompatResources.getDrawable(context, R.drawable.add_emoji_bg)
         image.layoutParams = mlp
         image.setOnClickListener {
-            Snackbar.make(it, context.getString(R.string.wip_stub), Snackbar.LENGTH_SHORT).show()
+            onAddReactionClick.invoke()
         }
         box.addView(image)
     }
