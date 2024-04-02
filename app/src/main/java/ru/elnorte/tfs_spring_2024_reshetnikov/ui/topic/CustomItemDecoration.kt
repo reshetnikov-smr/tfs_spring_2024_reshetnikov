@@ -1,4 +1,4 @@
-package ru.elnorte.tfs_spring_2024_reshetnikov
+package ru.elnorte.tfs_spring_2024_reshetnikov.ui.topic
 
 import android.graphics.Canvas
 import android.graphics.Color
@@ -6,6 +6,8 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
+import ru.elnorte.tfs_spring_2024_reshetnikov.asDateString
+import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.MessageUiModel
 
 class CustomItemDecoration(private val marginSize: Int) : RecyclerView.ItemDecoration() {
 

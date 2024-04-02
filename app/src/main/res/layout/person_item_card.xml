@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/personsCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/margin_increased"
+    android:background="@color/background">
+
+    <ImageView
+        android:id="@+id/personsAvatar"
+        android:layout_width="@dimen/persons_avatar_size"
+        android:layout_height="@dimen/persons_avatar_size"
+        android:background="@drawable/round_bg"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/regular_avatar"
+        tools:clipToOutline="true" />
+
+    <TextView
+        android:id="@+id/personsName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_increased"
+        android:fontFamily="@font/inter"
+        android:text="@string/sample_name"
+        android:textColor="@color/onContainer"
+        android:textSize="@dimen/font_huge"
+        app:layout_constraintStart_toEndOf="@+id/personsAvatar"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/personsEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_increased"
+        android:fontFamily="@font/inter"
+        android:text="@string/sample_email"
+        android:textColor="@color/email"
+        android:textSize="@dimen/font_standard"
+        app:layout_constraintBottom_toBottomOf="@+id/personsAvatar"
+        app:layout_constraintStart_toEndOf="@+id/personsAvatar" />
+
+    <ImageView
+        android:id="@+id/onlineIndicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/personsAvatar"
+        app:layout_constraintEnd_toEndOf="@+id/personsAvatar"
+        app:srcCompat="@drawable/online_indicator" />
+</androidx.constraintlayout.widget.ConstraintLayout>

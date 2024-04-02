@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:padding="20dp">
+
+    <include
+        android:id="@+id/profileInfoCard"
+        layout="@layout/profile_info_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/profile_margin_standard"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/profile_margin_standard"
+        android:backgroundTint="@color/container"
+        android:text="@string/log_out"
+        android:textColor="@color/onContainer"
+        app:layout_constraintEnd_toEndOf="@+id/profileInfoCard"
+        app:layout_constraintStart_toStartOf="@+id/profileInfoCard"
+        app:layout_constraintTop_toBottomOf="@+id/profileInfoCard" />
+</androidx.constraintlayout.widget.ConstraintLayout>

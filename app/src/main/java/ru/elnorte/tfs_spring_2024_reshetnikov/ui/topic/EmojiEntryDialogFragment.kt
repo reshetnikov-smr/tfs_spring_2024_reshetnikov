@@ -1,4 +1,4 @@
-package ru.elnorte.tfs_spring_2024_reshetnikov
+package ru.elnorte.tfs_spring_2024_reshetnikov.ui.topic
 
 import android.os.Bundle
 import android.util.TypedValue
@@ -7,12 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import ru.elnorte.tfs_spring_2024_reshetnikov.R
 import ru.elnorte.tfs_spring_2024_reshetnikov.databinding.EmojiEntryBottomSheetLayoutBinding
+import ru.elnorte.tfs_spring_2024_reshetnikov.provideEmojisList
 
 class EmojiEntryDialogFragment(var onSelectEmoji: (String) -> Unit) : BottomSheetDialogFragment() {
 
     private lateinit var binding: EmojiEntryBottomSheetLayoutBinding
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -20,6 +21,7 @@ class EmojiEntryDialogFragment(var onSelectEmoji: (String) -> Unit) : BottomShee
     ): View {
         binding = EmojiEntryBottomSheetLayoutBinding.inflate(inflater, container, false)
         binding.root.setBackgroundColor(resources.getColor(R.color.container, null))
+
         return binding.root
     }
 

@@ -19,10 +19,15 @@
 
     <string name="sad_smile">:(</string>
 
-    <string name="example_regular_name">Елена Игнатьева</string>
-    <string name="example_long_name">Абу Абдуллах Мухаммад ибн Муса аль-Хорезми</string>
-
-    <string name="example_regular_message">Привет, как дела?</string>
-    <string name="example_long_message">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</string>
+    <string name="placeholder">placeholder</string>
     <string name="send_message_placeholder">Написать…</string>
+    <string name="subscribed_tab">Subscribed</string>
+    <string name="all_streams_tab">All streams</string>
+    <string name="log_out">Log out</string>
+    <string name="sample_email">darrell@company.com</string>
+    <string name="sample_name">Darrell Steward</string>
+    <string name="sample_status">In a meeting</string>
+    <string name="sample_online_status">online</string>
+    <string name="temp_search_text">Search...</string>
+    <string name="temp_users_text">Users...</string>
 </resources>

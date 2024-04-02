@@ -1,4 +1,4 @@
-package ru.elnorte.tfs_spring_2024_reshetnikov
+package ru.elnorte.tfs_spring_2024_reshetnikov.ui.topic
 
 import android.content.Context
 import android.graphics.drawable.Drawable
@@ -9,6 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
+import ru.elnorte.tfs_spring_2024_reshetnikov.R
 
 
 class MessageViewGroup @JvmOverloads constructor(
@@ -106,6 +107,7 @@ class MessageViewGroup @JvmOverloads constructor(
                 context, R.drawable.stub_avatar
             )
         )
+        avatarImage.clipToOutline = true
     }
 
     fun setOnEmojiClickListener(lambda: (String) -> Unit) {

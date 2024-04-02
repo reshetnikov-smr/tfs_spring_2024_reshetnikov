@@ -1,11 +1,13 @@
-package ru.elnorte.tfs_spring_2024_reshetnikov
+package ru.elnorte.tfs_spring_2024_reshetnikov.ui.topic
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import ru.elnorte.tfs_spring_2024_reshetnikov.databinding.MessageItemCardBinding
+import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.MessageUiModel
 
 class MessageListAdapter(private val clickListener: MessageClickListener) :
     ListAdapter<MessageUiModel, MessageListAdapter.ViewHolder>(MessageDiffCallBack()) {
@@ -21,24 +23,32 @@ class MessageListAdapter(private val clickListener: MessageClickListener) :
     class ViewHolder private constructor(private val binding: MessageItemCardBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(item: MessageUiModel, clickListener: MessageClickListener) {
-            binding.message.setAvatar(item.senderAvatar)
-            binding.message.hideAvatar(item.isMineMessage)
-            binding.message.setName(item.userName)
-            binding.message.setMessageText(item.message)
-            binding.message.setOnLongClickListener {
-                if (item.reactions.isEmpty()) {
-                    clickListener.onLongClick(item)
+            with(binding) {
+                message.setAvatar(item.senderAvatar?.let {
+                    AppCompatResources.getDrawable(
+                        root.context,
+                        it
+                    )
+                })
+                message.hideAvatar(item.isMineMessage)
+                message.setName(item.userName)
+                message.setMessageText(item.message)
+                message.setOnLongClickListener {
+                    if (item.reactions.isEmpty()) {
+                        clickListener.onLongClick(item)
+                    }
+                    false
                 }
-                false
+                message.addEmojis(item.reactions, item.checkedReaction)
+                message.setOnEmojiClickListener {
+                    clickListener.onEmojiClick(
+                        it,
+                        item.messageId
+                    )
+                }
+                message.setOnAddReactionClickListener { clickListener.onAddReactionClick(item.messageId) }
             }
-            binding.message.addEmojis(item.reactions, item.checkedReaction)
-            binding.message.setOnEmojiClickListener {
-                clickListener.onEmojiClick(
-                    it,
-                    item.messageId
-                )
-            }
-            binding.message.setOnAddReactionClickListener { clickListener.onAddReactionClick(item.messageId) }
+
         }
 
         companion object {

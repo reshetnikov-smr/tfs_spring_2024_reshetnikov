@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/chatScreenRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/background"
+        android:paddingHorizontal="@dimen/padding_standard"
+        android:paddingVertical="@dimen/padding_small"
+        app:layout_constraintBottom_toTopOf="@+id/chatScreenMessageLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:itemCount="7"
+        tools:listitem="@layout/message_viewgroup_layout" />
+
+    <LinearLayout
+        android:id="@+id/chatScreenMessageLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/container"
+        android:orientation="horizontal"
+        android:paddingHorizontal="@dimen/padding_tiny"
+        android:paddingVertical="@dimen/padding_tiny"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <EditText
+            android:id="@+id/chatScreenInputMessageEditText"
+            android:layout_width="wrap_content"
+            android:layout_height="51dp"
+            android:layout_marginHorizontal="@dimen/margin_tiny"
+            android:layout_weight="1"
+            android:background="@drawable/message_bg"
+            android:gravity="center|start"
+            android:hint="@string/send_message_placeholder"
+            android:paddingHorizontal="@dimen/padding_standard"
+            android:text=""
+            android:textColor="@color/onSecondaryContainer"
+            android:textColorHint="@color/onSecondaryContainer"
+            android:textSize="@dimen/font_big" />
+
+        <ImageView
+            android:id="@+id/chatScreenMessageActionImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/margin_tiny"
+            android:layout_marginVertical="@dimen/margin_tiny"
+            android:layout_weight="0"
+            android:src="@drawable/add_file_image" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -29,7 +29,7 @@ fun provideEmojisList(): List<String> {
 
 fun getCurrentDateAndTime(): Long {
     val date = LocalDateTime.now()
-    val zoneId = ZoneId.systemDefault();
+    val zoneId = ZoneId.systemDefault()
     return date.atZone(zoneId).toEpochSecond()
 }
 

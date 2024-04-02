@@ -13,19 +13,20 @@
         android:layout_width="@dimen/message_avatar_size"
         android:layout_height="@dimen/message_avatar_size"
         android:adjustViewBounds="false"
+        android:background="@drawable/round_bg"
         android:cropToPadding="false"
         android:src="@drawable/stub_avatar"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:clipToOutline="true" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/messageCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/margin_increased"
+        android:layout_marginStart="@dimen/margin_increased"
         android:layout_marginBottom="2dp"
-        android:paddingHorizontal="@dimen/padding_small"
-        android:paddingVertical="@dimen/padding_small"
+        android:padding="@dimen/padding_small"
         app:cardBackgroundColor="@color/container"
         app:cardCornerRadius="18dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -49,7 +50,6 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="@string/example_regular_name"
                 android:textColor="@color/highlight"
                 android:textSize="@dimen/font_small"
                 app:fontFamily="inter"
@@ -60,7 +60,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/margin_big"
-                android:text="@string/example_regular_message"
                 android:textColor="@color/onContainer"
                 android:textSize="@dimen/font_standard"
                 app:fontFamily="inter"
@@ -68,7 +67,7 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <ru.elnorte.tfs_spring_2024_reshetnikov.FlexBoxLayout
+    <ru.elnorte.tfs_spring_2024_reshetnikov.ui.topic.FlexBoxLayout
         android:id="@+id/reactionFlexBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

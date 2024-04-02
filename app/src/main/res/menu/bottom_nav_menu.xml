@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/channelsFragment"
+        android:enabled="true"
+        android:icon="@drawable/channels_icon"
+        android:title="Channels" />
+    <item
+        android:id="@+id/contactsFragment"
+        android:enabled="true"
+        android:icon="@drawable/people_icon"
+        android:title="People" />
+    <item
+        android:id="@+id/profileFragment"
+        android:enabled="true"
+        android:icon="@drawable/profile_icon"
+        android:title="Profile" />
+</menu>

@@ -1,4 +1,4 @@
-package ru.elnorte.tfs_spring_2024_reshetnikov
+package ru.elnorte.tfs_spring_2024_reshetnikov.ui.topic
 
 import android.content.Context
 import android.graphics.Canvas
@@ -7,6 +7,7 @@ import android.text.TextPaint
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
+import ru.elnorte.tfs_spring_2024_reshetnikov.R
 
 class EmojiView @JvmOverloads constructor(
     context: Context,
@@ -20,7 +21,6 @@ class EmojiView @JvmOverloads constructor(
             if (field != value) {
                 field = value
                 requestLayout()
-                invalidate()
             }
         }
     var count: Int = 0

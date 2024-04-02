@@ -1,4 +1,4 @@
-package ru.elnorte.tfs_spring_2024_reshetnikov
+package ru.elnorte.tfs_spring_2024_reshetnikov.ui.topic
 
 import android.content.Context
 import android.util.AttributeSet

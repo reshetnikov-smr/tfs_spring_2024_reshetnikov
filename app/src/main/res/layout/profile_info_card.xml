@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@color/background">
+
+    <ImageView
+        android:id="@+id/profileCardAvatar"
+        android:layout_width="@dimen/profile_card_avatar_size"
+        android:layout_height="@dimen/profile_card_avatar_size"
+        android:background="@drawable/profile_rounded_corners_bg"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/regular_avatar"
+        tools:clipToOutline="true" />
+
+    <TextView
+        android:id="@+id/profileCardName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_big"
+        android:fontFamily="@font/inter"
+        android:text="@string/sample_name"
+        android:textColor="@color/onContainer"
+        android:textSize="@dimen/font_giant"
+        app:layout_constraintEnd_toEndOf="@+id/profileCardAvatar"
+        app:layout_constraintStart_toStartOf="@+id/profileCardAvatar"
+        app:layout_constraintTop_toBottomOf="@+id/profileCardAvatar"
+        tools:text="Darrell Steward" />
+
+    <TextView
+        android:id="@+id/profileCardStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_big"
+        android:fontFamily="@font/inter"
+        android:text="@string/sample_status"
+        android:textColor="@color/status"
+        android:textSize="@dimen/font_big"
+        app:layout_constraintStart_toStartOf="@+id/profileCardName"
+        app:layout_constraintTop_toBottomOf="@+id/profileCardName"
+        tools:text="In a meeting" />
+
+    <TextView
+        android:id="@+id/profileCardOnline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/inter"
+        android:text="@string/sample_online_status"
+        android:textColor="@color/online"
+        android:textSize="@dimen/font_standard"
+        app:layout_constraintBottom_toBottomOf="@+id/profileCardStatus"
+        app:layout_constraintEnd_toEndOf="@+id/profileCardName"
+        app:layout_constraintTop_toTopOf="@+id/profileCardStatus"
+        tools:text="online" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
