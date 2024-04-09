@@ -50,6 +50,7 @@ dependencies {
     val viewpager = "1.0.0"
     val livedata = "2.7.0"
     val lifecycle = "2.2.0"
+    val shimmer = "0.5.0"
 
     implementation("androidx.core:core-ktx:$kotlin")
     implementation("androidx.appcompat:appcompat:$appcompat")
@@ -64,4 +65,5 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:$livedata")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$livedata")
     implementation("androidx.lifecycle:lifecycle-extensions:$lifecycle")
+    implementation("com.facebook.shimmer:shimmer:$shimmer")
 }

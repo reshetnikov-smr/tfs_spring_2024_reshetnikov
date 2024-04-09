@@ -28,7 +28,6 @@ class EmojiView @JvmOverloads constructor(
             if (field != value) {
                 field = value
                 requestLayout()
-                invalidate()
             }
         }
     private val textToDraw
@@ -36,7 +35,7 @@ class EmojiView @JvmOverloads constructor(
 
     private var textPaint = TextPaint().apply {
         color = context.getColor(R.color.onContainer)
-        textSize = 18f.sp(context) //18
+        textSize = 18f.sp(context)
     }
 
     private val textRect = Rect()

@@ -7,9 +7,16 @@
     android:orientation="vertical">
 
     <include
+        android:id="@+id/user_search"
         layout="@layout/users_search_stub"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
+    <include
+        android:id="@+id/contacts_shimmer"
+        layout="@layout/contacts_shimmer_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/contactsRecyclerView"

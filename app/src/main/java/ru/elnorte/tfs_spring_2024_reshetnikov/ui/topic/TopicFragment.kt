@@ -10,6 +10,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.snackbar.Snackbar
 import ru.elnorte.tfs_spring_2024_reshetnikov.MainActivity
 import ru.elnorte.tfs_spring_2024_reshetnikov.R
 import ru.elnorte.tfs_spring_2024_reshetnikov.data.messengerrepository.FakeRepository
@@ -104,9 +105,18 @@ class TopicFragment : Fragment() {
 
         }
         viewModel.messagesList.observe(viewLifecycleOwner) {
+            val oldlistSize = adapter.itemCount
             adapter.submitList(it)
             itemDecoration.updateList(it)
-            binding.chatScreenRecyclerView.smoothScrollToPosition(adapter.itemCount)
+            if (oldlistSize < it.size) {
+                binding.chatScreenRecyclerView.smoothScrollToPosition(adapter.itemCount)
+            }
+        }
+        viewModel.error.observe(viewLifecycleOwner) {
+            if (it != null) {
+                Snackbar.make(requireView(), it, Snackbar.LENGTH_SHORT).show()
+                viewModel.onErrorCompleted()
+            }
         }
     }
 }

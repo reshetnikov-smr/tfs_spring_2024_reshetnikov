@@ -2,20 +2,6 @@ package ru.elnorte.tfs_spring_2024_reshetnikov.data.models
 
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.MessageUiModel
 
-/**
- * Message database model
- *
- * @property messageId
- * @property timestamp
- * @property senderId
- * @property isMineMessage
- * @property senderAvatar
- * @property userName
- * @property message
- * @property reactions Int - sender Id, String - emoji
- * @property checkedReaction
- * @constructor Create empty Message database model
- */
 data class MessageDatabaseModel(
     val messageId: Int,
     val timestamp: Long,
@@ -24,17 +10,19 @@ data class MessageDatabaseModel(
     val senderAvatar: Int?,
     val userName: String?,
     val message: String?,
-    val reactions: MutableMap<Int, String>,
-    val checkedReaction: String?
+    val reactions: MutableMap<Int, MutableSet<String>>,
+    val checkedReaction: Set<String>
 ) {
 
     fun asMessageUiModel(): MessageUiModel {
         val reactionsCount = mutableMapOf<String, Int>()
-        this.reactions.forEach {
-            if (reactionsCount.containsKey(it.value)) {
-                reactionsCount[it.value] = reactionsCount[it.value]!! + 1
-            } else {
-                reactionsCount[it.value] = 1
+        this.reactions.forEach { user ->
+            user.value.forEach {
+                if (reactionsCount.containsKey(it)) {
+                    reactionsCount[it] = reactionsCount[it]!! + 1
+                } else {
+                    reactionsCount[it] = 1
+                }
             }
         }
         return MessageUiModel(

@@ -73,7 +73,7 @@ class CustomItemDecoration(private val marginSize: Int) : RecyclerView.ItemDecor
         canvas.drawText(
             dateToShow,
             ((parent.width - dateToShow.length) / 2).toFloat(),
-            view.top.toFloat() - dateBounds.height(),
+            view.top.toFloat() - dateBounds.height() + 20,
             paintDate
         )
     }

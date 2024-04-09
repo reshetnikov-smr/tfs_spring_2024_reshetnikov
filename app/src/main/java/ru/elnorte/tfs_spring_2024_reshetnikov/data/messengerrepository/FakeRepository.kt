@@ -16,7 +16,7 @@ class FakeRepository : IMessengerRepository {
     private var myId = 2
     private var myAvatar = R.drawable.huge_avatar
     private var myUsername = "Алексей Решетников"
-    private val subscribedChannels = listOf(10000, 10002)
+    private val subscribedChannels = listOf(10000, 10001, 10002, 10003, 10004)
     private val topicsList = listOf(
         TopicDatabaseModel(
             1,
@@ -92,6 +92,24 @@ class FakeRepository : IMessengerRepository {
             "test no topics",
             emptyList(),
         ),
+        ChannelDatabaseModel(
+            10005,
+            "#Not interesting channel",
+            "test no topics",
+            emptyList(),
+        ),
+        ChannelDatabaseModel(
+            10006,
+            "#Not interesting channel2",
+            "test no topics",
+            emptyList(),
+        ),
+        ChannelDatabaseModel(
+            10007,
+            "#Not interesting channel3",
+            "test no topics",
+            emptyList(),
+        ),
     )
     private var conversation = mutableListOf(
         MessageDatabaseModel(
@@ -102,7 +120,7 @@ class FakeRepository : IMessengerRepository {
             R.drawable.redhead_avatar,
             "Елена Игнатьева",
             "Да я думаю, купить билеты нереально",
-            mutableMapOf(), null
+            mutableMapOf(), setOf()
         ),
         MessageDatabaseModel(
             2,
@@ -113,7 +131,7 @@ class FakeRepository : IMessengerRepository {
             "Елена Игнатьева",
             "Все пишут",
             mutableMapOf(),
-            null
+            setOf()
         ),
         MessageDatabaseModel(
             3,
@@ -123,7 +141,7 @@ class FakeRepository : IMessengerRepository {
             R.drawable.redhead_avatar,
             "Елена Игнатьева",
             "Просто хочу попробовать",
-            mutableMapOf(2 to "❤", 3 to "\uD83D\uDE03"), "❤"
+            mutableMapOf(2 to mutableSetOf("❤"), 3 to mutableSetOf("\uD83D\uDE03")), setOf("❤")
         ),
         MessageDatabaseModel(
             4,
@@ -133,7 +151,7 @@ class FakeRepository : IMessengerRepository {
             R.drawable.huge_avatar,
             "Алексей Решетников",
             "а где покупать?",
-            mutableMapOf(), null
+            mutableMapOf(), setOf()
         ),
         MessageDatabaseModel(
             5,
@@ -143,7 +161,7 @@ class FakeRepository : IMessengerRepository {
             R.drawable.redhead_avatar,
             "Елена Игнатьева",
             "Там ссылка",
-            mutableMapOf(2 to "\uD83D\uDC40"), "\uD83D\uDC40"
+            mutableMapOf(2 to mutableSetOf("\uD83D\uDC40")), setOf("\uD83D\uDC40")
         ),
         MessageDatabaseModel(
             6,
@@ -153,7 +171,7 @@ class FakeRepository : IMessengerRepository {
             R.drawable.redhead_avatar,
             "Елена Игнатьева",
             "Завтра в 12 начинается продажа",
-            mutableMapOf(), null
+            mutableMapOf(), setOf()
         ),
         MessageDatabaseModel(
             7,
@@ -163,7 +181,7 @@ class FakeRepository : IMessengerRepository {
             R.drawable.huge_avatar,
             "Алексей Решетников",
             "а, вижу",
-            mutableMapOf(), null
+            mutableMapOf(), setOf()
         ),
         MessageDatabaseModel(
             8,
@@ -173,7 +191,8 @@ class FakeRepository : IMessengerRepository {
             R.drawable.huge_avatar,
             "Алексей Решетников",
             "напомни только, а то я забуду",
-            mutableMapOf(1 to "\uD83D\uDE03", 3 to "\uD83D\uDE03"), null
+            mutableMapOf(1 to mutableSetOf("\uD83D\uDE03"), 3 to mutableSetOf("\uD83D\uDE03")),
+            setOf()
         ),
     )
     private val topicsContent = mutableMapOf(
@@ -187,7 +206,7 @@ class FakeRepository : IMessengerRepository {
                 R.drawable.redhead_avatar,
                 "Елена Игнатьева",
                 "bruh topic",
-                mutableMapOf(), null
+                mutableMapOf(), setOf()
             )
         ),
         3 to mutableListOf(
@@ -199,7 +218,7 @@ class FakeRepository : IMessengerRepository {
                 R.drawable.redhead_avatar,
                 "Елена Игнатьева",
                 "jetpack compose migration topic",
-                mutableMapOf(), null
+                mutableMapOf(), setOf()
             )
         ),
         4 to mutableListOf(
@@ -211,7 +230,7 @@ class FakeRepository : IMessengerRepository {
                 R.drawable.redhead_avatar,
                 "Елена Игнатьева",
                 "recyclerview topic",
-                mutableMapOf(), null
+                mutableMapOf(), setOf()
             )
         ),
         5 to mutableListOf(
@@ -223,7 +242,7 @@ class FakeRepository : IMessengerRepository {
                 R.drawable.redhead_avatar,
                 "Елена Игнатьева",
                 "figma or paint topic",
-                mutableMapOf(), null
+                mutableMapOf(), setOf()
             )
         ),
         6 to mutableListOf(
@@ -235,7 +254,7 @@ class FakeRepository : IMessengerRepository {
                 R.drawable.redhead_avatar,
                 "Елена Игнатьева",
                 "oleg topic",
-                mutableMapOf(), null
+                mutableMapOf(), setOf()
             )
         ),
         7 to mutableListOf(
@@ -247,22 +266,21 @@ class FakeRepository : IMessengerRepository {
                 R.drawable.redhead_avatar,
                 "Елена Игнатьева",
                 "naming topic",
-                mutableMapOf(), null
+                mutableMapOf(), setOf()
             )
         ),
     )
 
-    override fun getChannels(isOnlySubscribed: Boolean): List<ChannelUiModel> {
+    private fun getChannels(isOnlySubscribed: Boolean): List<ChannelDatabaseModel> {
         return if (isOnlySubscribed) {
             channelsList.filter { subscribedChannels.contains(it.channelId) }
-                .map { it.asChannelUiModel() }
-        } else {
-            channelsList.map { it.asChannelUiModel() }
-        }
 
+        } else {
+            channelsList
+        }
     }
 
-    override fun getChannelContent(channelId: Int): List<TopicUiModel> {
+    override suspend fun getChannelContent(channelId: Int): List<TopicUiModel> {
         val output = mutableListOf<TopicUiModel>()
         channelsList.first { it.channelId == channelId }.topicsList.forEach { topicIndex ->
             output.add(topicsList.first { it.topicId == topicIndex }.asTopicUiModel())
@@ -270,8 +288,8 @@ class FakeRepository : IMessengerRepository {
         return output.toList()
     }
 
-    override fun getPeople(): List<PersonUiModel> {
-        val personsList = List(15) {
+    override suspend fun getPeople(): List<PersonUiModel> {
+        val personsList = mutableListOf(
             PersonUiModel(
                 1,
                 "Елена Игнатьева",
@@ -279,31 +297,36 @@ class FakeRepository : IMessengerRepository {
                 "On the road again..",
                 "online",
                 R.drawable.redhead_avatar,
-            )
-        }
-//        return listOf(
-//            PersonUiModel(
-//                1,
-//                "Елена Игнатьева",
-//                "helen@company.name",
-//                "On the road again..",
-//                "online",
-//                R.drawable.redhead_avatar,
-//            ),
-//            PersonUiModel(
-//                2,
-//                "Алексей Решетников",
-//                "alex@company.name",
-//                "Coding..",
-//                "online",
-//                R.drawable.huge_avatar,
-//
-//            ),
-//        )
+            ),
+            PersonUiModel(
+                2,
+                "Алексей Решетников",
+                "alex@company.name",
+                "Coding..",
+                "online",
+                R.drawable.huge_avatar,
+            ),
+            PersonUiModel(
+                3,
+                "Татьяна Суслова",
+                "tany@company.name",
+                "hello",
+                "online",
+                R.drawable.stub_avatar,
+            ),
+            PersonUiModel(
+                4,
+                "Алексей Усольце",
+                "lexa@company.name",
+                "hello",
+                "online",
+                R.drawable.stub_avatar,
+            ),
+        )
         return personsList
     }
 
-    override fun getMe(): PersonUiModel {
+    override suspend fun getMe(): PersonUiModel {
         return PersonUiModel(
             14327,
             "Darrell Steward",
@@ -314,41 +337,46 @@ class FakeRepository : IMessengerRepository {
         )
     }
 
-    override fun getTopic(topicId: Int): List<MessageUiModel> {
+    override suspend fun getTopic(topicId: Int): List<MessageUiModel> {
         return topicsContent[topicId]?.map { it.asMessageUiModel() } ?: emptyList()
     }
 
-    override fun toggleReaction(topicId: Int, messageId: Int, emoji: String) {
+    override suspend fun toggleReaction(topicId: Int, messageId: Int, emoji: String) {
         val chat = topicsContent[topicId]
         val message = chat?.find { it.messageId == messageId }
         var messageIndex: Int?
         message.let {
             messageIndex = chat?.indexOf(message)
         }
-        if (message?.reactions?.containsKey(myId) == true) {
-            if (message.reactions[myId] == emoji) {
-                message.reactions.remove(myId)
+        if (message?.checkedReaction?.contains(emoji) == true) {
+            message.reactions[myId]?.remove(emoji)
+            val checkedReactions = message.checkedReaction.toMutableSet()
+            checkedReactions.remove(emoji)
+            messageIndex?.let {
                 topicsContent[topicId]?.set(
-                    chat.indexOf(message),
-                    message.copy(checkedReaction = null)
+                    it,
+                    message.copy(checkedReaction = checkedReactions)
                 )
             }
         } else {
-            message?.reactions?.put(myId, emoji)
+            if (message?.reactions?.containsKey(myId) == false) {
+                message.reactions[myId] = mutableSetOf()
+            }
+            message?.reactions?.get(myId)?.add(emoji)
             if (message != null) {
                 messageIndex?.let {
+                    val checkedReactions = message.checkedReaction.toMutableSet()
+                    checkedReactions.add(emoji)
                     topicsContent[topicId]?.set(
                         it,
-                        message.copy(checkedReaction = emoji)
+                        message.copy(checkedReaction = checkedReactions)
                     )
                 }
             }
         }
-
-        // topicsContent[topicId]?.find { it.messageId == messageId }
     }
 
-    override fun addMessage(topicId: Int, message: String) {
+    override suspend fun addMessage(topicId: Int, message: String) {
         topicsContent[topicId]?.add(
             MessageDatabaseModel(
                 topicsContent[topicId]?.last()?.messageId?.plus(1) ?: 1,
@@ -359,9 +387,31 @@ class FakeRepository : IMessengerRepository {
                 myUsername,
                 message,
                 mutableMapOf(),
-                null
+                setOf()
 
             )
         )
     }
+
+    override suspend fun queryChannels(queryText: CharSequence): List<ChannelUiModel> =
+        getChannels(false).filter {
+            it.channelName.contains(queryText) || it.channelDescription.contains(queryText)
+        }.toUiModel()
+
+    override suspend fun querySubscribedChannels(queryText: CharSequence): List<ChannelUiModel> =
+        getChannels(true).filter {
+            it.channelName.contains(queryText) || it.channelDescription.contains(queryText)
+        }.toUiModel()
+
+    override suspend fun queryContacts(queryText: String): List<PersonUiModel> {
+        return getPeople().filter {
+            it.name.contains(queryText)
+        }
+    }
+
 }
+
+private fun List<ChannelDatabaseModel>.toUiModel(): List<ChannelUiModel> =
+    map {
+        it.asChannelUiModel()
+    }

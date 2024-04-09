@@ -79,10 +79,10 @@ class MessageViewGroup @JvmOverloads constructor(
         findViewById<FlexBoxLayout>(R.id.reactionFlexBox).removeAllViews()
     }
 
-    fun addEmojis(emojis: Map<String, Int>?, selectedEmoji: String?) {
+    fun addEmojis(emojis: Map<String, Int>?, selectedEmoji: Set<String>) {
         clearEmojis()
         emojis?.forEach {
-            addEmoji(it.key, it.value, it.key == selectedEmoji)
+            addEmoji(it.key, it.value, selectedEmoji.contains(it.key))
         }
         if (!emojis.isNullOrEmpty()) {
             initializeFlexBox()
