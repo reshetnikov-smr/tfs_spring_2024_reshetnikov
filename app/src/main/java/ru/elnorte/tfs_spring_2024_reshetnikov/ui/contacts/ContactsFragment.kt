@@ -9,20 +9,21 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import ru.elnorte.tfs_spring_2024_reshetnikov.MainActivity
 import ru.elnorte.tfs_spring_2024_reshetnikov.afterTextChanged
-import ru.elnorte.tfs_spring_2024_reshetnikov.data.messengerrepository.FakeRepository
+import ru.elnorte.tfs_spring_2024_reshetnikov.data.repository.UserRepository
 import ru.elnorte.tfs_spring_2024_reshetnikov.databinding.ContactsFragmentBinding
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.PersonUiModel
-import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.QueryResultUiState
+import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.ResultUiState
 
 class ContactsFragment : Fragment() {
 
     private val viewModel: ContactsViewModel by viewModels {
-        ContactsViewModelFactory(FakeRepository())
+        ContactsViewModelFactory(UserRepository())
     }
     private var _binding: ContactsFragmentBinding? = null
     private val binding get() = _binding!!
@@ -49,7 +50,15 @@ class ContactsFragment : Fragment() {
         (requireActivity() as MainActivity).showBottomNav()
 
         adapter = ContactsListAdapter(ContactsClickListener {
-            Snackbar.make(requireView(), "user number $it clicked", Snackbar.LENGTH_SHORT).show()
+            this.findNavController().navigate(
+                ContactsFragmentDirections.actionToPerson(
+                    it.avatar,
+                    it.name,
+                    it.status,
+                    it.isOnline
+                )
+            )
+            viewModel.navigateToPersonCompleted()
         })
         with(binding) {
             contactsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -60,23 +69,23 @@ class ContactsFragment : Fragment() {
     private fun initObservers() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { uiState: QueryResultUiState<PersonUiModel> ->
+                viewModel.uiState.collect { uiState: ResultUiState<PersonUiModel> ->
                     when (uiState) {
-                        is QueryResultUiState.Success -> {
+                        is ResultUiState.Success -> {
                             handleContactList(uiState.dataList)
                             setShimmerHidden()
                         }
 
-                        is QueryResultUiState.Error -> {
+                        is ResultUiState.Error -> {
                             Snackbar.make(
                                 requireView(),
-                                uiState.exception.message.orEmpty(),
+                                uiState.errorMessage,
                                 Snackbar.LENGTH_SHORT
                             ).show()
                             setShimmerHidden()
                         }
 
-                        QueryResultUiState.Loading -> {
+                        ResultUiState.Loading -> {
                             setShimmerVisible()
                         }
                     }
@@ -104,5 +113,4 @@ class ContactsFragment : Fragment() {
         binding.contactsShimmer.root.visibility = View.GONE
         binding.contactsRecyclerView.visibility = View.VISIBLE
     }
-
 }

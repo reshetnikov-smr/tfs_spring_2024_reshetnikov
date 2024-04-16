@@ -6,7 +6,7 @@ data class MessageUiModel(
     val timestamp: Long,
     val senderId: Int,
     val isMineMessage: Boolean,
-    val senderAvatar: Int?,
+    val senderAvatar: String?,
     val userName: String?,
     val message: String?,
     val reactions: Map<String, Int>,

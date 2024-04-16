@@ -9,12 +9,17 @@ data class TopicDatabaseModel(
     var color: String,
 )
 
-fun TopicDatabaseModel.asTopicUiModel(): TopicUiModel {
+fun TopicDatabaseModel.asTopicUiModel(channelId: Int): TopicUiModel {
     return TopicUiModel(
         this.topicId,
+        channelId,
         this.name,
         "${this.messagesCount} mes",
         this.color
 
     )
+}
+
+fun List<TopicDatabaseModel>.asTopicUiModel(channelId: Int): List<TopicUiModel> {
+    return this.map { it.asTopicUiModel(channelId) }
 }

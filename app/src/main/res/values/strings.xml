@@ -25,9 +25,10 @@
     <string name="all_streams_tab">All streams</string>
     <string name="log_out">Log out</string>
     <string name="sample_email">darrell@company.com</string>
-    <string name="sample_name">Darrell Steward</string>
+    <string name="sample_name">Darrell Steward </string>
     <string name="sample_status">In a meeting</string>
     <string name="sample_online_status">online</string>
     <string name="temp_search_text">Search...</string>
     <string name="temp_users_text">Users...</string>
+    <string name="profile_text">Profile</string>
 </resources>

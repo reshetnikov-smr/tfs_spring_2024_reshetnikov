@@ -1,7 +1,6 @@
 package ru.elnorte.tfs_spring_2024_reshetnikov.ui.topic
 
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
@@ -9,6 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.bumptech.glide.Glide
 import ru.elnorte.tfs_spring_2024_reshetnikov.R
 
 
@@ -100,13 +100,13 @@ class MessageViewGroup @JvmOverloads constructor(
         messageString.text = name ?: context.getText(R.string.missing_message)
     }
 
-    fun setAvatar(avatar: Drawable?) {
+    fun setAvatar(avatarUrl: String?) {
         val avatarImage = findViewById<ImageView>(R.id.avatarImageView)
-        avatarImage.setImageDrawable(
-            avatar ?: AppCompatResources.getDrawable(
-                context, R.drawable.stub_avatar
-            )
-        )
+        Glide.with(this)
+            .load(avatarUrl)
+            .placeholder(R.drawable.stub_avatar)
+            .error(R.drawable.download_fail_image)
+            .into(avatarImage)
         avatarImage.clipToOutline = true
     }
 

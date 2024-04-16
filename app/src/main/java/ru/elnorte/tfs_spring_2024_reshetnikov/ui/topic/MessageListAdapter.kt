@@ -2,7 +2,6 @@ package ru.elnorte.tfs_spring_2024_reshetnikov.ui.topic
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -24,12 +23,7 @@ class MessageListAdapter(private val clickListener: MessageClickListener) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(item: MessageUiModel, clickListener: MessageClickListener) {
             with(binding) {
-                message.setAvatar(item.senderAvatar?.let {
-                    AppCompatResources.getDrawable(
-                        root.context,
-                        it
-                    )
-                })
+                message.setAvatar(item.senderAvatar)
                 message.hideAvatar(item.isMineMessage)
                 message.setName(item.userName)
                 message.setMessageText(item.message)
@@ -43,7 +37,8 @@ class MessageListAdapter(private val clickListener: MessageClickListener) :
                 message.setOnEmojiClickListener {
                     clickListener.onEmojiClick(
                         it,
-                        item.messageId
+                        item.messageId,
+                        item.checkedReaction.contains(it),
                     )
                 }
                 message.setOnAddReactionClickListener { clickListener.onAddReactionClick(item.messageId) }
@@ -73,15 +68,15 @@ class MessageDiffCallBack : DiffUtil.ItemCallback<MessageUiModel>() {
 
 class MessageClickListener(
     val longClickListener: (messageId: Int) -> Unit,
-    val emojiClickListener: (emoji: String, messageId: Int) -> Unit,
+    val emojiClickListener: (emoji: String, messageId: Int, isSelected: Boolean) -> Unit,
     val addReaction: (messageId: Int) -> Unit
 ) {
     fun onLongClick(item: MessageUiModel): Boolean {
         longClickListener(item.messageId); return true
     }
 
-    fun onEmojiClick(item: String, messageId: Int) {
-        emojiClickListener(item, messageId)
+    fun onEmojiClick(item: String, messageId: Int, isSelected: Boolean) {
+        emojiClickListener(item, messageId, isSelected)
     }
 
     fun onAddReactionClick(messageId: Int) {

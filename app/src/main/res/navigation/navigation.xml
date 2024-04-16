@@ -18,7 +18,11 @@
         android:id="@+id/contactsFragment"
         android:name="ru.elnorte.tfs_spring_2024_reshetnikov.ui.contacts.ContactsFragment"
         android:label="ContactsFragment"
-        tools:layout="@layout/contacts_fragment" />
+        tools:layout="@layout/contacts_fragment">
+        <action
+            android:id="@+id/action_toPerson"
+            app:destination="@id/personFragment" />
+    </fragment>
     <fragment
         android:id="@+id/profileFragment"
         android:name="ru.elnorte.tfs_spring_2024_reshetnikov.ui.profile.ProfileFragment"
@@ -29,7 +33,29 @@
         android:name="ru.elnorte.tfs_spring_2024_reshetnikov.ui.topic.TopicFragment"
         android:label="TopicFragment">
         <argument
-            android:name="topicId"
+            android:name="topicName"
+            app:argType="string" />
+        <argument
+            android:name="channelId"
             app:argType="integer" />
+    </fragment>
+    <fragment
+        android:id="@+id/personFragment"
+        android:name="ru.elnorte.tfs_spring_2024_reshetnikov.ui.person.PersonFragment"
+        android:label="PersonFragment"
+        tools:layout="@layout/person_fragment">
+        <argument
+            android:name="avatar"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="name"
+            app:argType="string" />
+        <argument
+            android:name="status"
+            app:argType="string" />
+        <argument
+            android:name="isOnline"
+            app:argType="ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.OnlineStatus" />
     </fragment>
 </navigation>

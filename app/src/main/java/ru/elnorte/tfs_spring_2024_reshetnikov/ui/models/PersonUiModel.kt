@@ -5,6 +5,10 @@ data class PersonUiModel(
     val name: String,
     val email: String,
     val status: String,
-    val isOnline: String,
-    val avatar: Int?,
+    val isOnline: OnlineStatus,
+    val avatar: String?,
 )
+
+enum class OnlineStatus {
+    Online, Idle, Offline
+}

@@ -15,11 +15,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import ru.elnorte.tfs_spring_2024_reshetnikov.MainActivity
-import ru.elnorte.tfs_spring_2024_reshetnikov.data.messengerrepository.FakeRepository
+import ru.elnorte.tfs_spring_2024_reshetnikov.data.repository.ChannelRepository
+import ru.elnorte.tfs_spring_2024_reshetnikov.data.repository.MessageConverter
 import ru.elnorte.tfs_spring_2024_reshetnikov.databinding.PageFragmentBinding
 import ru.elnorte.tfs_spring_2024_reshetnikov.isSubscribed
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.channels.ChannelsFragmentDirections
-import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.QueryResultUiState
+import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.ResultUiState
 import ru.elnorte.tfs_spring_2024_reshetnikov.utils.ISONLYSUBSCRIBEDARGUMENT
 import ru.elnorte.tfs_spring_2024_reshetnikov.utils.QUERY_TEXT_KEY
 
@@ -29,7 +30,10 @@ class PageFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: PageViewModel by viewModels {
-        PageViewModelFactory(FakeRepository(), requireArguments().isSubscribed())
+        PageViewModelFactory(
+            ChannelRepository(MessageConverter()),
+            requireArguments().isSubscribed()
+        )
     }
 
     private lateinit var adapter: PageListAdapter
@@ -69,8 +73,8 @@ class PageFragment : Fragment() {
 
         adapter = PageListAdapter(PageClickListener({
             viewModel.onChannelClick(it)
-        }, {
-            viewModel.onTopicClick(it)
+        }, { name, parent ->
+            viewModel.onTopicClick(name, parent)
         }))
         binding.pageRecyclerView.adapter = adapter
         val layoutManager = LinearLayoutManager(requireContext())
@@ -80,7 +84,8 @@ class PageFragment : Fragment() {
     private fun initObservers() {
         viewModel.navigateToChat.observe(viewLifecycleOwner) {
             if (it != null) {
-                this.findNavController().navigate(ChannelsFragmentDirections.actionToTopic(it))
+                this.findNavController()
+                    .navigate(ChannelsFragmentDirections.actionToTopic(it.name, it.parent))
                 viewModel.navigateToChatCompleted()
             }
         }
@@ -91,19 +96,19 @@ class PageFragment : Fragment() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { uiState ->
                     when (uiState) {
-                        is QueryResultUiState.Error -> {
+                        is ResultUiState.Error -> {
                             Snackbar.make(
-                                requireView(), uiState.exception.message.orEmpty(),
+                                requireView(), uiState.errorMessage,
                                 Snackbar.LENGTH_SHORT
                             ).show()
                             setShimmerHidden()
                         }
 
-                        QueryResultUiState.Loading -> {
+                        ResultUiState.Loading -> {
                             setShimmerVisible()
                         }
 
-                        is QueryResultUiState.Success -> {
+                        is ResultUiState.Success -> {
                             adapter.submitList(uiState.dataList)
                             setShimmerHidden()
                         }

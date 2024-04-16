@@ -81,7 +81,7 @@ class PageListAdapter(private val clickListener: PageClickListener) :
             binding.topicMessageCount.text = item.messages
             binding.topicItemCard.setBackgroundColor(Color.parseColor(item.color))
             binding.topicItemCard.setOnClickListener {
-                clickListener.onTopicClick(item.topicId)
+                clickListener.onTopicClick(item.name, item.parentId)
             }
         }
 
@@ -109,9 +109,9 @@ class PageDiffCallBack : DiffUtil.ItemCallback<PageItem>() {
 
 class PageClickListener(
     val channelClickListener: (item: Int) -> Unit,
-    val topicClickListener: (item: Int) -> Unit
+    val topicClickListener: (item: String, parent: Int) -> Unit
 ) {
 
     fun onChannelClick(item: Int) = channelClickListener(item)
-    fun onTopicClick(item: Int) = topicClickListener(item)
+    fun onTopicClick(item: String, parent: Int) = topicClickListener(item, parent)
 }

@@ -13,6 +13,8 @@
     <color name="barBackground">#1E1E1E</color>
     <color name="status">#BCBCBC</color>
     <color name="online">#4AB54D</color>
+    <color name="idle">#ffcc00</color>
+    <color name="offline">#ff0000</color>
     <color name="email">#A1A1A1</color>
     <color name="navigationUnchecked">#919191</color>
     <color name="background_app_bar">#1E1E1E</color>

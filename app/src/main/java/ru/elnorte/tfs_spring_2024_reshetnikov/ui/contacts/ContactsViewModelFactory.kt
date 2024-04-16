@@ -2,9 +2,9 @@ package ru.elnorte.tfs_spring_2024_reshetnikov.ui.contacts
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import ru.elnorte.tfs_spring_2024_reshetnikov.data.messengerrepository.IMessengerRepository
+import ru.elnorte.tfs_spring_2024_reshetnikov.data.repository.IUserRepository
 
-class ContactsViewModelFactory(private val repository: IMessengerRepository) :
+class ContactsViewModelFactory(private val repository: IUserRepository) :
     ViewModelProvider.Factory {
 
     @Suppress("unchecked_cast")

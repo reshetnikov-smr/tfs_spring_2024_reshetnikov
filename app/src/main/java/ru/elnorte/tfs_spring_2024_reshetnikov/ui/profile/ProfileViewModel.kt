@@ -5,10 +5,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import ru.elnorte.tfs_spring_2024_reshetnikov.data.messengerrepository.IMessengerRepository
+import ru.elnorte.tfs_spring_2024_reshetnikov.data.repository.IUserRepository
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.PersonUiModel
 
-class ProfileViewModel(repository: IMessengerRepository) : ViewModel() {
+class ProfileViewModel(repository: IUserRepository) : ViewModel() {
 
     private val _personModel = MutableLiveData<PersonUiModel>()
     val personModel: LiveData<PersonUiModel>

@@ -2,6 +2,7 @@ package ru.elnorte.tfs_spring_2024_reshetnikov
 
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.widget.EditText
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
@@ -27,6 +28,7 @@ fun provideEmojisList(): List<String> {
         "\uD83E\uDD21",
         "\uD83D\uDC40",
         "😌", "😇", "🎃",
+        String(Character.toChars("2049".toInt(radix = 16))),
     )
 }
 
@@ -58,3 +60,23 @@ fun EditText.afterTextChanged(action: (String) -> Unit) {
 }
 
 fun Int.isSubscribed() = this % 2 == 0
+
+fun unicodeEmojiToHexString(input: String): String {
+    return String.format("%04x", Character.codePointAt(input, 0))
+}
+
+fun hexStringToUnicodeEmoji(input: String): String {
+    return String(Character.toChars(input.toInt(radix = 16)))
+}
+
+/**
+ * elnorte's log function.
+ * Log is accessible in logcat, with "ellog" filter
+ * Will be deleted once app is ready
+ *
+ * @param T type parameter
+ * @param item the message that will be written to log
+ */
+fun <T> ellog(item: T) {
+    Log.d("ellog", item.toString())
+}

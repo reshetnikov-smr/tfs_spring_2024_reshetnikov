@@ -1,5 +1,7 @@
 package ru.elnorte.tfs_spring_2024_reshetnikov.ui.contacts
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -14,16 +16,20 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import ru.elnorte.tfs_spring_2024_reshetnikov.data.messengerrepository.IMessengerRepository
+import ru.elnorte.tfs_spring_2024_reshetnikov.data.repository.IUserRepository
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.PersonUiModel
-import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.QueryResultUiState
+import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.ResultUiState
 
-class ContactsViewModel(private val repository: IMessengerRepository) : ViewModel() {
+class ContactsViewModel(private val repository: IUserRepository) : ViewModel() {
 
-    private val _uiState: MutableStateFlow<QueryResultUiState<PersonUiModel>> =
-        MutableStateFlow(QueryResultUiState.Loading)
+    private val _uiState: MutableStateFlow<ResultUiState<PersonUiModel>> =
+        MutableStateFlow(ResultUiState.Loading)
 
-    val uiState: StateFlow<QueryResultUiState<PersonUiModel>> = _uiState
+    val uiState: StateFlow<ResultUiState<PersonUiModel>> = _uiState
+
+    private val _navigateToPerson = MutableLiveData<Int?>()
+    val navigateToPerson: LiveData<Int?>
+        get() = _navigateToPerson
 
     private val queryTextFlow = MutableStateFlow("")
 
@@ -37,11 +43,15 @@ class ContactsViewModel(private val repository: IMessengerRepository) : ViewMode
         queryTextFlow.value = queryText
     }
 
+    fun navigateToPersonCompleted() {
+        _navigateToPerson.value = null
+    }
+
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     private suspend fun handleQuery() {
         queryTextFlow
-            .onEach { _uiState.value = QueryResultUiState.Loading }
-            .debounce(2000)
+            .onEach { _uiState.value = ResultUiState.Loading }
+            .debounce(500)
             .distinctUntilChanged()
             .flatMapLatest { queryText ->
                 flow {
@@ -50,7 +60,7 @@ class ContactsViewModel(private val repository: IMessengerRepository) : ViewMode
             }
             .flowOn(Dispatchers.IO)
             .collect { list ->
-                _uiState.value = QueryResultUiState.Success(list)
+                _uiState.value = ResultUiState.Success(list)
             }
     }
 }

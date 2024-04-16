@@ -16,27 +16,28 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import ru.elnorte.tfs_spring_2024_reshetnikov.data.messengerrepository.IMessengerRepository
+import ru.elnorte.tfs_spring_2024_reshetnikov.data.repository.IChannelRepository
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.ChannelUiModel
-import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.QueryResultUiState
+import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.ResultUiState
+import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.TopicTransferModel
 
 class PageViewModel(
-    private val repository: IMessengerRepository,
+    private val repository: IChannelRepository,
     private val isSubscribedOnly: Boolean,
 ) : ViewModel() {
 
     private var channelsList = mutableListOf<PageItem>()
 
-    private val _navigateToChat = MutableLiveData<Int?>()
-    val navigateToChat: LiveData<Int?>
+    private val _navigateToChat = MutableLiveData<TopicTransferModel>()
+    val navigateToChat: LiveData<TopicTransferModel>
         get() = _navigateToChat
 
     private val _queryFlow = MutableStateFlow("")
 
-    private val _uiState: MutableStateFlow<QueryResultUiState<PageItem>> =
-        MutableStateFlow(QueryResultUiState.Loading)
+    private val _uiState: MutableStateFlow<ResultUiState<PageItem>> =
+        MutableStateFlow(ResultUiState.Loading)
 
-    val uiState: StateFlow<QueryResultUiState<PageItem>> = _uiState
+    val uiState: StateFlow<ResultUiState<PageItem>> = _uiState
 
     init {
         viewModelScope.launch {
@@ -53,19 +54,19 @@ class PageViewModel(
             channelsList.removeAt(itemIndex)
             channelsList.add(itemIndex, PageItem.ChannelItem(item))
 
-            val channelContent = repository.getChannelContent(channelId)
+            val channelContent = repository.getTopics(channelId)
 
             if (!expandedState) {
                 channelsList.addAll(itemIndex + 1, channelContent.map { PageItem.TopicItem(it) })
             } else {
                 channelsList.removeAll(channelContent.map { PageItem.TopicItem(it) })
             }
+            _uiState.value = ResultUiState.Success(channelsList.toList())
         }
-        _uiState.value = QueryResultUiState.Success(channelsList.toList())
     }
 
-    fun onTopicClick(topicId: Int) {
-        _navigateToChat.value = topicId
+    fun onTopicClick(topicName: String, parent: Int) {
+        _navigateToChat.value = TopicTransferModel(topicName, parent)
     }
 
     fun navigateToChatCompleted() {
@@ -75,10 +76,10 @@ class PageViewModel(
     @OptIn(ExperimentalCoroutinesApi::class)
     private suspend fun query() {
         _queryFlow
-            .onEach { _uiState.value = QueryResultUiState.Loading }
+            .onEach { _uiState.value = ResultUiState.Loading }
             .flatMapLatest { queryText ->
                 flow {
-                    delay(2000)
+                    delay(500)
                     if (isSubscribedOnly) {
                         emit(repository.querySubscribedChannels(queryText))
 
@@ -98,14 +99,13 @@ class PageViewModel(
                 channelsList.addAll(it)
             }
             .flowOn(Dispatchers.IO)
-            .catch { _uiState.value = QueryResultUiState.Error(it) }
-            .collect { list ->
-                if ((0..5).random() != 1) {
-                    _uiState.value = QueryResultUiState.Success(list)
-                } else {
-                    _uiState.value =
-                        QueryResultUiState.Error(Exception("Something went wrong.Error imitation"))
+            .catch { throwable ->
+                throwable.message?.let {
+                    _uiState.value = ResultUiState.Error(it)
                 }
+            }
+            .collect { list ->
+                _uiState.value = ResultUiState.Success(list)
             }
     }
 

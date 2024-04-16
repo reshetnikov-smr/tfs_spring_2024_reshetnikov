@@ -15,3 +15,7 @@ fun ChannelDatabaseModel.asChannelUiModel(): ChannelUiModel {
         name = channelName,
     )
 }
+
+fun List<ChannelDatabaseModel>.asChannelUiModel(): List<ChannelUiModel> {
+    return this.map { it.asChannelUiModel() }
+}

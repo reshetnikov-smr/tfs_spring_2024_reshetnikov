@@ -20,26 +20,32 @@
 
     <TextView
         android:id="@+id/personsName"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_increased"
         android:fontFamily="@font/inter"
+        android:ellipsize="end"
+        android:maxLines="1"
         android:text="@string/sample_name"
         android:textColor="@color/onContainer"
         android:textSize="@dimen/font_huge"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/personsAvatar"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/personsEmail"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_increased"
+        android:ellipsize="middle"
         android:fontFamily="@font/inter"
+        android:maxLines="1"
         android:text="@string/sample_email"
         android:textColor="@color/email"
         android:textSize="@dimen/font_standard"
         app:layout_constraintBottom_toBottomOf="@+id/personsAvatar"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/personsAvatar" />
 
     <ImageView

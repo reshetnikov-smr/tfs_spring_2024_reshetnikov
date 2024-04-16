@@ -2,10 +2,10 @@ package ru.elnorte.tfs_spring_2024_reshetnikov.ui.page
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import ru.elnorte.tfs_spring_2024_reshetnikov.data.messengerrepository.IMessengerRepository
+import ru.elnorte.tfs_spring_2024_reshetnikov.data.repository.IChannelRepository
 
 class PageViewModelFactory(
-    private val repository: IMessengerRepository,
+    private val repository: IChannelRepository,
     private val isSubscribedOnly: Boolean
 ) :
     ViewModelProvider.Factory {

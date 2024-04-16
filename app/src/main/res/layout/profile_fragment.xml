@@ -23,6 +23,7 @@
         android:layout_marginTop="@dimen/profile_margin_standard"
         android:backgroundTint="@color/container"
         android:text="@string/log_out"
+        android:visibility="gone"
         android:textColor="@color/onContainer"
         app:layout_constraintEnd_toEndOf="@+id/profileInfoCard"
         app:layout_constraintStart_toStartOf="@+id/profileInfoCard"
