@@ -4,10 +4,6 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import ru.elnorte.tfs_spring_2024_reshetnikov.data.models.asChannelUiModel
 import ru.elnorte.tfs_spring_2024_reshetnikov.data.models.asTopicUiModel
@@ -19,6 +15,7 @@ import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.ChannelUiModel
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.MessageUiModel
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.ResultUiState
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.TopicUiModel
+import ru.elnorte.tfs_spring_2024_reshetnikov.ui.repository.IChannelRepository
 
 class ChannelRepository(
     private val messageConverter: MessageConverter,
@@ -26,7 +23,6 @@ class ChannelRepository(
     override suspend fun queryChannels(queryText: CharSequence): List<ChannelUiModel> {
         return withContext(Dispatchers.IO) {
             val data = MessengerApi.retrofitService.getStreams()
-
             data.asChannelsDatabaseModel().filter {
                 it.channelName.contains(queryText) || it.channelDescription.contains(queryText)
             }.asChannelUiModel()
@@ -36,7 +32,6 @@ class ChannelRepository(
     override suspend fun querySubscribedChannels(queryText: CharSequence): List<ChannelUiModel> {
         return withContext(Dispatchers.IO) {
             val data = MessengerApi.retrofitService.getSubscribedStreams()
-
             data.asChannelsDatabaseModel().filter {
                 it.channelName.contains(queryText) || it.channelDescription.contains(queryText)
             }.asChannelUiModel()
@@ -46,44 +41,34 @@ class ChannelRepository(
     override suspend fun getTopics(channelId: Int): List<TopicUiModel> {
         return withContext(Dispatchers.IO) {
             val data = MessengerApi.retrofitService.getTopics(channelId)
-
             data.asTopicsDatabaseModel().asTopicUiModel(channelId)
         }
     }
 
+
     override suspend fun getTopic(
         streamId: Int,
         topicName: String,
-    ): Flow<ResultUiState<MessageUiModel>> {
+    ): List<MessageUiModel> {
+        return withContext(Dispatchers.IO) {
+            val narrowJson =
+                "[{\"negated\":false,\"operator\":\"stream\",\"operand\":$streamId},{\"negated\":false,\"operator\":\"topic\",\"operand\":\"$topicName\"}]"
 
-        val narrowJson =
-            "[{\"negated\":false,\"operator\":\"stream\",\"operand\":$streamId},{\"negated\":false,\"operator\":\"topic\",\"operand\":\"$topicName\"}]"
 
-        return flow<ResultUiState<MessageUiModel>> {
-            while (true) {
-                val call = MessengerApi.retrofitService.getMessages(
-                    "newest",
-                    100,
-                    0,
-                    narrowJson
-                )
-                val response = call.execute()
-                if (response.isSuccessful) {
-                    val data = response.body()
+            val call = MessengerApi.retrofitService.getMessages(
+                "newest",
+                100,
+                0,
+                narrowJson
+            )
+            val response = call.execute()
 
-                    val result = data?.run {
-                        messageConverter.convert(messages)
-                    }
-                    result?.let {
-                        emit(ResultUiState.Success(result))
-                    }
-                } else {
-
-                }
-                delay(2000)
+            if (response.isSuccessful) {
+                val data = response.body()
+                data?.run { messageConverter.convert(messages) } ?: emptyList()
+            } else {
+                emptyList()
             }
-        }.catch { throwable ->
-            throwable.message?.let { emit(ResultUiState.Error(it)) }
         }
     }
 

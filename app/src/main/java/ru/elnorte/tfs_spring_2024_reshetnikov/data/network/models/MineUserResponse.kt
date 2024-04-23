@@ -41,7 +41,7 @@ data class MineUserResponse(
     @Json(name = "delivery_email")
     val deliveryEmail: String, // elnortemobile@gmail.com
     @Json(name = "avatar_url")
-    val avatarUrl: String, // https://zulip-avatars.s3.amazonaws.com/63414/a6fcc9d57f63284a522bad3c0ac582035af2ee58?version=2
+    val avatarUrl: String?, // https://zulip-avatars.s3.amazonaws.com/63414/a6fcc9d57f63284a522bad3c0ac582035af2ee58?version=2
     @Json(name = "profile_data")
     val profileData: ProfileData,
     @Json(name = "max_message_id")

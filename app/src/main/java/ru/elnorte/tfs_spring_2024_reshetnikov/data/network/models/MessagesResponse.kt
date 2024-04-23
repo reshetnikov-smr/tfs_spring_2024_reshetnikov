@@ -23,7 +23,7 @@ data class MessagesResponse(
 @JsonClass(generateAdapter = true)
 data class MessageResponse(
     @Json(name = "avatar_url")
-    val avatarUrl: String, // https://secure.gravatar.com/avatar/6d8cad0fd00256e7b40691d27ddfd466?d=identicon&version=1
+    val avatarUrl: String?, // https://secure.gravatar.com/avatar/6d8cad0fd00256e7b40691d27ddfd466?d=identicon&version=1
     val client: String, // populate_db
     val content: String, // <p>Security experts agree that relational algorithms are an interesting new topic in the field of networking, and scholars concur.</p>
     @Json(name = "content_type")

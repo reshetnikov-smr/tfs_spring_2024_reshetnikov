@@ -12,6 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/profile_margin_standard"
+        android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -23,9 +24,16 @@
         android:layout_marginTop="@dimen/profile_margin_standard"
         android:backgroundTint="@color/container"
         android:text="@string/log_out"
-        android:visibility="gone"
         android:textColor="@color/onContainer"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="@+id/profileInfoCard"
         app:layout_constraintStart_toStartOf="@+id/profileInfoCard"
         app:layout_constraintTop_toBottomOf="@+id/profileInfoCard" />
+
+    <include
+        android:id="@+id/profileShimmer"
+        layout="@layout/profile_shimmer_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
 </androidx.constraintlayout.widget.ConstraintLayout>

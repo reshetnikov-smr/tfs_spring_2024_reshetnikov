@@ -4,39 +4,87 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.launch
-import ru.elnorte.tfs_spring_2024_reshetnikov.MainActivity
+import ru.elnorte.tfs_spring_2024_reshetnikov.R
 import ru.elnorte.tfs_spring_2024_reshetnikov.afterTextChanged
 import ru.elnorte.tfs_spring_2024_reshetnikov.data.repository.UserRepository
 import ru.elnorte.tfs_spring_2024_reshetnikov.databinding.ContactsFragmentBinding
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.PersonUiModel
-import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.ResultUiState
+import ru.elnorte.tfs_spring_2024_reshetnikov.ui.mvi.BaseFragmentMvi
+import ru.elnorte.tfs_spring_2024_reshetnikov.ui.mvi.MviStore
+import ru.elnorte.tfs_spring_2024_reshetnikov.utils.snackbarError
 
-class ContactsFragment : Fragment() {
+class ContactsFragment :
+    BaseFragmentMvi<ContactsPartialState, ContactsIntent, ContactsState, ContactsEffect>(
+        R.layout.contacts_fragment
+    ) {
 
-    private val viewModel: ContactsViewModel by viewModels {
-        ContactsViewModelFactory(UserRepository())
+    override val store: MviStore<
+            ContactsPartialState,
+            ContactsIntent,
+            ContactsState,
+            ContactsEffect
+            > by viewModels {
+        ContactsStoreFactory(
+            ContactsReducer(),
+            ContactsActor(UserRepository())
+        )
     }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        if (savedInstanceState == null) {
+            store.postIntent(ContactsIntent.Init)
+        }
+    }
+
     private var _binding: ContactsFragmentBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var adapter: ContactsListAdapter
+
+    override fun resolveEffect(effect: ContactsEffect) {
+        when (effect) {
+            is ContactsEffect.ShowError -> snackbarError(requireView(), effect.throwable)
+
+            is ContactsEffect.NavigateToPerson -> this.findNavController().navigate(
+                ContactsFragmentDirections.actionToPerson(
+                    effect.avatar,
+                    effect.name,
+                    effect.status,
+                    effect.isOnline
+                )
+            )
+        }
+    }
+
+    override fun render(state: ContactsState) {
+        when (val dataToRender = state.contactsUi) {
+            is ContactsUiState.Success -> {
+                val data = dataToRender.data
+                handleContactList(data)
+                setShimmerHidden()
+            }
+
+            is ContactsUiState.Error -> {
+
+            }
+
+            ContactsUiState.Loading -> {
+                setShimmerVisible()
+            }
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = ContactsFragmentBinding.inflate(inflater, container, false)
         setupAndInit()
-        initObservers()
         handleSearchQuery()
         return binding.root
     }
@@ -47,50 +95,22 @@ class ContactsFragment : Fragment() {
     }
 
     private fun setupAndInit() {
-        (requireActivity() as MainActivity).showBottomNav()
-
-        adapter = ContactsListAdapter(ContactsClickListener {
-            this.findNavController().navigate(
-                ContactsFragmentDirections.actionToPerson(
-                    it.avatar,
-                    it.name,
-                    it.status,
-                    it.isOnline
+        adapter = ContactsListAdapter(
+            ContactsClickListener {
+                store.postIntent(
+                    ContactsIntent.NavigateToPerson(
+                        it.avatar,
+                        it.name,
+                        it.status,
+                        it.isOnline
+                    )
                 )
-            )
-            viewModel.navigateToPersonCompleted()
-        })
+            }
+        )
+
         with(binding) {
             contactsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
             contactsRecyclerView.adapter = adapter
-        }
-    }
-
-    private fun initObservers() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { uiState: ResultUiState<PersonUiModel> ->
-                    when (uiState) {
-                        is ResultUiState.Success -> {
-                            handleContactList(uiState.dataList)
-                            setShimmerHidden()
-                        }
-
-                        is ResultUiState.Error -> {
-                            Snackbar.make(
-                                requireView(),
-                                uiState.errorMessage,
-                                Snackbar.LENGTH_SHORT
-                            ).show()
-                            setShimmerHidden()
-                        }
-
-                        ResultUiState.Loading -> {
-                            setShimmerVisible()
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -99,7 +119,13 @@ class ContactsFragment : Fragment() {
     }
 
     private fun handleSearchQuery() {
-        binding.userSearch.searchQuery.afterTextChanged { viewModel.sendQueryFlow(it) }
+        binding.userSearch.searchQuery.afterTextChanged {
+            queryHandle(it)
+        }
+    }
+
+    private fun queryHandle(query: String) {
+        (store as? ContactsStore)?.updateQuery(query)
     }
 
     private fun setShimmerVisible() {

@@ -11,20 +11,22 @@ class MessageConverter {
     }
 
     private fun List<MessageResponse>.toDomain(): List<MessageUiModel> {
-        return map {
+        return map { messageResponse ->
             val reactionMap: Map<String, Int> =
-                it.reactions.groupingBy { it.toEmojiStyle() }.eachCount()
+                messageResponse.reactions.groupingBy { it.toEmojiStyle() }.eachCount()
             val checkedSet =
-                it.reactions.filter { it.user.id == 709775 }.map { it.toEmojiStyle() }.toSet()
+                messageResponse.reactions.filter { it.user.id == 709775 }.map { it.toEmojiStyle() }
+                    .toSet()
 
             MessageUiModel(
-                messageId = it.id,
-                timestamp = it.timestamp.toLong(),
-                senderId = it.senderId,
-                isMineMessage = it.isMeMessage,
-                senderAvatar = it.avatarUrl,
-                userName = it.senderFullName,
-                message = removeHtmlTags(it.content).replace("\n", "").replace("\r", ""),
+                messageId = messageResponse.id,
+                timestamp = messageResponse.timestamp.toLong(),
+                senderId = messageResponse.senderId,
+                isMineMessage = messageResponse.senderId == 709775,
+                senderAvatar = messageResponse.avatarUrl,
+                userName = messageResponse.senderFullName,
+                message = removeHtmlTags(messageResponse.content).replace("\n", "")
+                    .replace("\r", ""),
                 reactions = reactionMap,
                 checkedReaction = checkedSet
             )
@@ -50,14 +52,5 @@ class MessageConverter {
     private fun removeHtmlTags(input: String): String {
         return Html.fromHtml(input, Html.FROM_HTML_MODE_LEGACY).toString()
             .replace(Regex("<.*?>"), "")
-    }
-
-    private fun frequencyMap(list: List<Int>): MutableMap<Int, Int> {
-        val map = mutableMapOf<Int, Int>()
-        for (value in list) {
-            val count = map.getOrDefault(value, 0)
-            map[value] = count + 1
-        }
-        return map
     }
 }

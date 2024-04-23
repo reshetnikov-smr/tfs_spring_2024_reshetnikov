@@ -38,6 +38,9 @@
         <argument
             android:name="channelId"
             app:argType="integer" />
+        <action
+            android:id="@+id/action_topicFragment_to_channelsFragment"
+            app:destination="@id/channelsFragment" />
     </fragment>
     <fragment
         android:id="@+id/personFragment"
@@ -57,5 +60,8 @@
         <argument
             android:name="isOnline"
             app:argType="ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.OnlineStatus" />
+        <action
+            android:id="@+id/action_personFragment_to_contactsFragment"
+            app:destination="@id/contactsFragment" />
     </fragment>
 </navigation>

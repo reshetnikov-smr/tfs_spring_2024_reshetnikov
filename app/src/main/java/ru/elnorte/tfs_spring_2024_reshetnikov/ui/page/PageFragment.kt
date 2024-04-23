@@ -4,35 +4,44 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.launch
 import ru.elnorte.tfs_spring_2024_reshetnikov.MainActivity
+import ru.elnorte.tfs_spring_2024_reshetnikov.R
 import ru.elnorte.tfs_spring_2024_reshetnikov.data.repository.ChannelRepository
 import ru.elnorte.tfs_spring_2024_reshetnikov.data.repository.MessageConverter
 import ru.elnorte.tfs_spring_2024_reshetnikov.databinding.PageFragmentBinding
 import ru.elnorte.tfs_spring_2024_reshetnikov.isSubscribed
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.channels.ChannelsFragmentDirections
-import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.ResultUiState
+import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.TopicTransferModel
+import ru.elnorte.tfs_spring_2024_reshetnikov.ui.mvi.BaseFragmentMvi
+import ru.elnorte.tfs_spring_2024_reshetnikov.ui.mvi.MviStore
 import ru.elnorte.tfs_spring_2024_reshetnikov.utils.ISONLYSUBSCRIBEDARGUMENT
 import ru.elnorte.tfs_spring_2024_reshetnikov.utils.QUERY_TEXT_KEY
+import ru.elnorte.tfs_spring_2024_reshetnikov.utils.snackbarError
 
-class PageFragment : Fragment() {
+class PageFragment :
+    BaseFragmentMvi<
+            PagePartialState,
+            PageIntent,
+            PageState,
+            PageEffect
+            >(R.layout.page_fragment) {
 
     private var _binding: PageFragmentBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: PageViewModel by viewModels {
-        PageViewModelFactory(
-            ChannelRepository(MessageConverter()),
-            requireArguments().isSubscribed()
+    override val store: MviStore<
+            PagePartialState,
+            PageIntent,
+            PageState,
+            PageEffect
+            > by viewModels {
+        PageStoreFactory(
+            PageReducer(),
+            PageActor(ChannelRepository(MessageConverter()))
         )
     }
 
@@ -53,14 +62,51 @@ class PageFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         _binding = PageFragmentBinding.inflate(inflater, container, false)
-        setupAndInit()
-        initObservers()
+        newSetup()
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        getChannels()
+    private fun newSetup() {
+        (requireActivity() as MainActivity).showBottomNav()
+
+        adapter = PageListAdapter(PageClickListener({
+            store.postIntent(PageIntent.ChannelItemClick(it))
+        }, { name, parent ->
+            resolveEffect(PageEffect.NavigateToChat(TopicTransferModel(name, parent)))
+        }))
+        binding.pageRecyclerView.adapter = adapter
+        val layoutManager = LinearLayoutManager(requireContext())
+        binding.pageRecyclerView.layoutManager = layoutManager
+    }
+
+    override fun resolveEffect(effect: PageEffect) {
+        when (effect) {
+            is PageEffect.NavigateToChat -> {
+                this.findNavController()
+                    .navigate(
+                        ChannelsFragmentDirections.actionToTopic(
+                            effect.topicTransferModel.name,
+                            effect.topicTransferModel.parent
+                        )
+                    )
+            }
+
+            is PageEffect.ShowError -> snackbarError(requireView(), effect.throwable)
+        }
+    }
+
+    override fun render(state: PageState) {
+        when (val dataToRender = state.pageUi) {
+            is PageUiState.Success -> {
+                adapter.submitList(dataToRender.data)
+                setShimmerHidden()
+            }
+
+            is PageUiState.Error -> {}
+            PageUiState.Loading -> {
+                setShimmerVisible()
+            }
+        }
     }
 
     override fun onDestroyView() {
@@ -68,59 +114,10 @@ class PageFragment : Fragment() {
         _binding = null
     }
 
-    private fun setupAndInit() {
-        (requireActivity() as MainActivity).showBottomNav()
-
-        adapter = PageListAdapter(PageClickListener({
-            viewModel.onChannelClick(it)
-        }, { name, parent ->
-            viewModel.onTopicClick(name, parent)
-        }))
-        binding.pageRecyclerView.adapter = adapter
-        val layoutManager = LinearLayoutManager(requireContext())
-        binding.pageRecyclerView.layoutManager = layoutManager
-    }
-
-    private fun initObservers() {
-        viewModel.navigateToChat.observe(viewLifecycleOwner) {
-            if (it != null) {
-                this.findNavController()
-                    .navigate(ChannelsFragmentDirections.actionToTopic(it.name, it.parent))
-                viewModel.navigateToChatCompleted()
-            }
-        }
-    }
-
-    private fun getChannels() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { uiState ->
-                    when (uiState) {
-                        is ResultUiState.Error -> {
-                            Snackbar.make(
-                                requireView(), uiState.errorMessage,
-                                Snackbar.LENGTH_SHORT
-                            ).show()
-                            setShimmerHidden()
-                        }
-
-                        ResultUiState.Loading -> {
-                            setShimmerVisible()
-                        }
-
-                        is ResultUiState.Success -> {
-                            adapter.submitList(uiState.dataList)
-                            setShimmerHidden()
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     private fun getQueryText(bundle: Bundle, key: String) {
+        val subscribedFlag = requireArguments().isSubscribed()
         bundle.getString(key)?.let {
-            viewModel.sendQuery(it)
+            store.postIntent(PageIntent.SendQuery(it, subscribedFlag))
         }
     }
 

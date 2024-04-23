@@ -6,6 +6,7 @@ import ru.elnorte.tfs_spring_2024_reshetnikov.data.network.MessengerApi
 import ru.elnorte.tfs_spring_2024_reshetnikov.data.network.models.UsersMapper
 import ru.elnorte.tfs_spring_2024_reshetnikov.data.network.models.asPersonUiModel
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.PersonUiModel
+import ru.elnorte.tfs_spring_2024_reshetnikov.ui.repository.IUserRepository
 
 class UserRepository : IUserRepository {
     override suspend fun getPeople(): List<PersonUiModel> {
