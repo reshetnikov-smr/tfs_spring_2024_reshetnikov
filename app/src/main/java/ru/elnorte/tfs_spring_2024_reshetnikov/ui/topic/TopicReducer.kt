@@ -1,17 +1,14 @@
 package ru.elnorte.tfs_spring_2024_reshetnikov.ui.topic
 
-import ru.elnorte.tfs_spring_2024_reshetnikov.ellog
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.ChatUiModel
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.MessageUiModel
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.mvi.MviReducer
+import javax.inject.Inject
 
-class TopicReducer : MviReducer<TopicPartialState, TopicState> {
+class TopicReducer @Inject constructor() : MviReducer<TopicPartialState, TopicState> {
     override fun reduce(prevState: TopicState, partialState: TopicPartialState): TopicState {
-        ellog("reduce update ${partialState.javaClass}")
         return when (partialState) {
-            is TopicPartialState.DataLoaded -> updatePageInState(
-                prevState, partialState.model
-            )
+            is TopicPartialState.DataLoaded -> updatePageInState(partialState.model)
 
             is TopicPartialState.ActionButtonChanged -> updateActionButtonInState(
                 prevState,
@@ -20,33 +17,45 @@ class TopicReducer : MviReducer<TopicPartialState, TopicState> {
 
             TopicPartialState.NoChanges -> prevState
             is TopicPartialState.MessagesLoaded -> messagesLoaded(prevState, partialState.model)
+            is TopicPartialState.MessagesSent -> messageSent(prevState, partialState.messages)
+        }
+    }
+
+    private fun messageSent(prevState: TopicState, messages: List<MessageUiModel>): TopicState {
+        return if (prevState is TopicSuccess) {
+            val data = prevState.data.copy(messages = messages)
+            TopicSuccess(data, showLastMessage = true)
+        } else {
+            prevState
         }
     }
 
     private fun messagesLoaded(prevState: TopicState, model: List<MessageUiModel>): TopicState {
-        val prevUIState = prevState.topicUi
-        if (prevUIState is TopicUiState.Success) {
-            val oldState = prevUIState.data
-            return TopicState(TopicUiState.Success(oldState.copy(messages = model)))
+        if (prevState is TopicSuccess) {
+            val data = prevState.data.copy(messages = model)
+            return TopicSuccess(data)
         }
         return prevState
     }
 
     private fun updatePageInState(
-        prevState: TopicState,
         current: ChatUiModel,
     ): TopicState {
-        return TopicState(TopicUiState.Success(current))
+        return TopicSuccess(current)
     }
 
     private fun updateActionButtonInState(prevState: TopicState, isSend: Boolean): TopicState {
-        val prevUIState = prevState.topicUi
-        if (prevUIState is TopicUiState.Success) {
-            val oldState = prevUIState.data
+        if (prevState is TopicSuccess) {
             return if (isSend) {
-                TopicState(TopicUiState.Success(oldState.copy(messageState = MessageState.SEND_FILE)))
+                TopicSuccess(
+                    prevState.data.copy(messageState = MessageState.SEND_FILE),
+                    showLastMessage = prevState.showLastMessage
+                )
             } else {
-                TopicState(TopicUiState.Success(oldState.copy(messageState = MessageState.SEND_MESSAGE)))
+                TopicSuccess(
+                    prevState.data.copy(messageState = MessageState.SEND_MESSAGE),
+                    showLastMessage = prevState.showLastMessage
+                )
             }
         }
         return prevState

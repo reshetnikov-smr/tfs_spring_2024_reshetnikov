@@ -2,4 +2,10 @@ package ru.elnorte.tfs_spring_2024_reshetnikov.ui.page
 
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.mvi.MviState
 
-data class PageState(val pageUi: PageUiState<List<PageItem>>) : MviState
+sealed class PageState : MviState
+
+data object PageInit : PageState()
+
+data class PageSuccess(val list: List<PageItem>) : PageState()
+
+data object PageLoading : PageState()

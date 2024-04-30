@@ -8,6 +8,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class ChannelsViewModel : ViewModel() {
@@ -30,9 +31,11 @@ class ChannelsViewModel : ViewModel() {
     }
 
     fun changePosition(position: Int) {
-        currentPosition = position
-        val text = queryText.value?.text.orEmpty()
-        _queryText.value = QueryPageParams(text, position)
+        if (currentPosition != position) {
+            currentPosition = position
+            val text = queryText.value?.text.orEmpty()
+            _queryText.value = QueryPageParams(text, position)
+        }
     }
 
     @OptIn(FlowPreview::class)
@@ -40,8 +43,11 @@ class ChannelsViewModel : ViewModel() {
         _queryTextFlow
             .debounce(2000)
             .distinctUntilChanged()
+            .map {
+                QueryPageParams(it, currentPosition)
+            }
             .collect {
-                _queryText.value = QueryPageParams(it, currentPosition)
+                _queryText.value = it
             }
     }
 }

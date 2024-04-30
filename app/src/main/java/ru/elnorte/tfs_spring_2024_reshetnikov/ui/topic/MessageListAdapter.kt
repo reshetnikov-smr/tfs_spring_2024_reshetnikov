@@ -22,26 +22,26 @@ class MessageListAdapter(private val clickListener: MessageClickListener) :
     class ViewHolder private constructor(private val binding: MessageItemCardBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(item: MessageUiModel, clickListener: MessageClickListener) {
-            with(binding) {
-                message.setAvatar(item.senderAvatar)
-                message.hideAvatar(item.isMineMessage)
-                message.setName(item.userName)
-                message.setMessageText(item.message)
-                message.setOnLongClickListener {
+            with(binding.message) {
+                setAvatar(item.senderAvatar)
+                setName(item.userName)
+                setMessageText(item.message)
+                setOnLongClickListener {
                     if (item.reactions.isEmpty()) {
                         clickListener.onLongClick(item)
                     }
                     false
                 }
-                message.addEmojis(item.reactions, item.checkedReaction)
-                message.setOnEmojiClickListener {
+                addEmojis(item.reactions, item.checkedReaction)
+                setOnEmojiClickListener {
                     clickListener.onEmojiClick(
                         it,
                         item.messageId,
                         item.checkedReaction.contains(it),
                     )
                 }
-                message.setOnAddReactionClickListener { clickListener.onAddReactionClick(item.messageId) }
+                setOnAddReactionClickListener { clickListener.onAddReactionClick(item.messageId) }
+                tuneState(item.isMineMessage)
             }
 
         }
@@ -72,7 +72,8 @@ class MessageClickListener(
     val addReaction: (messageId: Int) -> Unit
 ) {
     fun onLongClick(item: MessageUiModel): Boolean {
-        longClickListener(item.messageId); return true
+        longClickListener(item.messageId)
+        return true
     }
 
     fun onEmojiClick(item: String, messageId: Int, isSelected: Boolean) {

@@ -2,8 +2,6 @@ package ru.elnorte.tfs_spring_2024_reshetnikov.data.network.models
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.OnlineStatus
-import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.PersonUiModel
 
 @JsonClass(generateAdapter = true)
 data class PeopleResponse(
@@ -47,46 +45,4 @@ data class PeopleResponse(
         @Json(name = "avatar_url")
         val avatarUrl: String? // https://secure.gravatar.com/avatar/7d1ac4b3194f3da9c1e92ce2b5390bf9?d=identicon&version=1
     )
-}
-
-
-fun UsersMapper(people: PeopleResponse, presence: UsersPresenceResponse): List<PersonUiModel> {
-    val output = mutableListOf<PersonUiModel>()
-    people.members.forEach {
-        val lastAction =
-            presence.serverTimestamp - (presence.presences[it.email]?.website?.timestamp ?: 0)
-        val onlineStatus = when {
-            presence.presences[it.email]?.website?.status == "active" && lastAction < 300 -> OnlineStatus.Online
-            presence.presences[it.email]?.website?.status == "idle" && lastAction < 300 -> OnlineStatus.Idle
-            else -> OnlineStatus.Offline
-        }
-        output.add(
-            PersonUiModel(
-                it.userId,
-                it.fullName,
-                it.email,
-                "",
-                onlineStatus,
-                it.avatarUrl
-            )
-        )
-    }
-    return output
-}
-
-fun PeopleResponse.asPersonUI(): List<PersonUiModel> {
-    val output = mutableListOf<PersonUiModel>()
-    this.members.forEach {
-        output.add(
-            PersonUiModel(
-                it.userId,
-                it.fullName,
-                it.email,
-                "",
-                OnlineStatus.Online,
-                it.avatarUrl
-            )
-        )
-    }
-    return output
 }

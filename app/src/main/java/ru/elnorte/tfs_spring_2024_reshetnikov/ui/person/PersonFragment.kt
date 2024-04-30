@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.addCallback
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -24,7 +23,7 @@ class PersonFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = PersonFragmentBinding.inflate(inflater, container, false)
         setupAndInit()
         return binding.root
@@ -33,13 +32,6 @@ class PersonFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        requireActivity().onBackPressedDispatcher.addCallback(this) {
-            findNavController().navigate(PersonFragmentDirections.actionPersonFragmentToContactsFragment())
-        }
     }
 
     private fun setupAndInit() {
@@ -72,11 +64,6 @@ class PersonFragment : Fragment() {
                     .into(profileInfoCard.profileCardAvatar)
             }
             toolbar.setupWithNavController(findNavController())
-            toolbar.setNavigationOnClickListener {
-                findNavController().navigate(
-                    PersonFragmentDirections.actionPersonFragmentToContactsFragment()
-                )
-            }
             toolbar.title = ""
         }
     }

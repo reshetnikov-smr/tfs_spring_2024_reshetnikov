@@ -11,5 +11,4 @@ sealed interface TopicIntent : MviIntent {
     data class LongMessageClick(val messageId: Int) : TopicIntent
     data class AddReactionClick(val messageId: Int) : TopicIntent
     data class TextEnteredIntent(val isEmpty: Boolean) : TopicIntent
-    data object NavigateBack : TopicIntent
 }

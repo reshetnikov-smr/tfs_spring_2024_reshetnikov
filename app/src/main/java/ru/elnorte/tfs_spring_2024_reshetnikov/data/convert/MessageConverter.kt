@@ -1,11 +1,12 @@
-package ru.elnorte.tfs_spring_2024_reshetnikov.data.repository
+package ru.elnorte.tfs_spring_2024_reshetnikov.data.convert
 
 import android.text.Html
 import ru.elnorte.tfs_spring_2024_reshetnikov.data.network.models.MessageResponse
 import ru.elnorte.tfs_spring_2024_reshetnikov.data.network.models.ReactionResponse
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.MessageUiModel
+import javax.inject.Inject
 
-class MessageConverter {
+class MessageConverter @Inject constructor() {
     fun convert(remote: List<MessageResponse>): List<MessageUiModel> {
         return remote.toDomain()
     }
@@ -37,7 +38,6 @@ class MessageConverter {
         when (reactionType) {
             "unicode_emoji" -> {
                 if (!emojiCode.contains("-")) {
-                    //emojiName
                     String(Character.toChars(emojiCode.toInt(radix = 16)))
                 } else {
                     ""

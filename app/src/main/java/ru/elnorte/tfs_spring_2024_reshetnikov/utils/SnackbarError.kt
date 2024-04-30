@@ -1,12 +1,17 @@
 package ru.elnorte.tfs_spring_2024_reshetnikov.utils
 
 import android.view.View
+import android.widget.TextView
 import com.google.android.material.snackbar.Snackbar
 
-fun snackbarError(view: View, t: Throwable) {
-    Snackbar.make(
+
+fun snackbarError(view: View, message: String) {
+    val snack = Snackbar.make(
         view,
-        "Something went wrong ${t.message.toString()}",
+        message,
         Snackbar.LENGTH_SHORT
-    ).show()
+    )
+    val snackbarView = snack.view
+    snackbarView.findViewById<TextView>(com.google.android.material.R.id.snackbar_text).maxLines = 5
+    snack.show()
 }

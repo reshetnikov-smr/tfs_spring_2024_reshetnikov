@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/pageRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -12,6 +12,7 @@
 
     <include
         android:id="@+id/shimmerFragment"
+        android:visibility="gone"
         layout="@layout/channels_shimmer_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

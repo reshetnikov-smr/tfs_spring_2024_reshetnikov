@@ -1,9 +1,10 @@
 package ru.elnorte.tfs_spring_2024_reshetnikov.ui.repository
 
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.PersonUiModel
+import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.ResponseState
 
 interface IUserRepository {
-    suspend fun getPeople(): List<PersonUiModel>
-    suspend fun getMe(): PersonUiModel
-    suspend fun queryContacts(queryText: String): List<PersonUiModel>
+    suspend fun getPeople(): ResponseState<List<PersonUiModel>>
+    suspend fun getMe(): ResponseState<PersonUiModel>
+    suspend fun queryContacts(queryText: String): ResponseState<List<PersonUiModel>>
 }

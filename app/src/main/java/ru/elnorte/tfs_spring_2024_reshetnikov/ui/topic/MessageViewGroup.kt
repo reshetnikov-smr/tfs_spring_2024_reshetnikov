@@ -7,9 +7,12 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import ru.elnorte.tfs_spring_2024_reshetnikov.R
+import ru.elnorte.tfs_spring_2024_reshetnikov.dp
 
 
 class MessageViewGroup @JvmOverloads constructor(
@@ -22,49 +25,68 @@ class MessageViewGroup @JvmOverloads constructor(
     private lateinit var onEmojiClick: (String) -> Unit
     private lateinit var onAddReactionClick: () -> Unit
 
-    fun hideAvatar(isHidden: Boolean) {
-        if (isHidden) {
-            findViewById<ImageView>(R.id.avatarImageView).visibility = View.GONE
+    private var avatarView: ImageView
+    private var messageCard: CardView
+    private var flexBoxLayout: FlexBoxLayout
+    private var senderName: TextView
+
+    fun tuneState(isMe: Boolean) {
+        if (isMe) {
+            avatarView.visibility = View.GONE
+            senderName.visibility = View.GONE
+            val params = messageCard.layoutParams as LayoutParams
+            params.marginStart = 80.dp
+            params.marginEnd = 8.dp
+            messageCard.layoutParams = params
+            meBackgroundColor()
         } else {
-            findViewById<ImageView>(R.id.avatarImageView).visibility = View.VISIBLE
+            avatarView.visibility = View.VISIBLE
+            senderName.visibility = View.VISIBLE
+            val params = messageCard.layoutParams as LayoutParams
+            params.marginStart = 8.dp
+            params.marginEnd = 60.dp
+            messageCard.layoutParams = params
+            otherBackgroundColor()
         }
     }
 
+    private fun meBackgroundColor() {
+        val gradientDrawable =
+            ContextCompat.getDrawable(context, R.drawable.me_message_background)
+        messageCard.background = gradientDrawable
+    }
+
+    private fun otherBackgroundColor() {
+        messageCard.background = ContextCompat.getDrawable(context, R.drawable.message_bg)
+    }
+
+
     init {
         inflate(context, R.layout.message_viewgroup_layout, this)
+        avatarView = findViewById(R.id.avatarImageView)
+        messageCard = findViewById(R.id.messageCard)
+        flexBoxLayout = findViewById(R.id.reactionFlexBox)
+        senderName = findViewById(R.id.senderName)
     }
 
     private fun addEmoji(emoji: String, count: Int, checked: Boolean) {
         val box = findViewById<FlexBoxLayout>(R.id.reactionFlexBox)
         val mlp =
             MarginLayoutParams(MarginLayoutParams.WRAP_CONTENT, MarginLayoutParams.WRAP_CONTENT)
-        mlp.bottomMargin =
-            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5f, resources.displayMetrics)
-                .toInt()
-        mlp.topMargin =
-            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5f, resources.displayMetrics)
-                .toInt()
-        mlp.leftMargin =
-            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5f, resources.displayMetrics)
-                .toInt()
-        mlp.rightMargin =
-            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5f, resources.displayMetrics)
-                .toInt()
+        mlp.bottomMargin = marginToPx(5f)
+        mlp.topMargin = marginToPx(5f)
+        mlp.leftMargin = marginToPx(5f)
+        mlp.rightMargin = marginToPx(5f)
         val emo = EmojiView(this.context)
         emo.emoji = emoji
         emo.count = count
         emo.background = AppCompatResources.getDrawable(context, R.drawable.emoji_bg)
         emo.layoutParams = mlp
         emo.setPadding(
-            TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP, 9f, resources.displayMetrics
-            ).toInt(),
-            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5f, resources.displayMetrics)
-                .toInt(),
-            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 9f, resources.displayMetrics)
-                .toInt(),
-            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5f, resources.displayMetrics)
-                .toInt()
+            marginToPx(9f),
+            marginToPx(5f),
+            marginToPx(9f),
+            marginToPx(5f)
         )
         if (checked) {
             emo.isSelected = true
@@ -101,13 +123,12 @@ class MessageViewGroup @JvmOverloads constructor(
     }
 
     fun setAvatar(avatarUrl: String?) {
-        val avatarImage = findViewById<ImageView>(R.id.avatarImageView)
         Glide.with(this)
             .load(avatarUrl)
             .placeholder(R.drawable.stub_avatar)
             .error(R.drawable.download_fail_image)
-            .into(avatarImage)
-        avatarImage.clipToOutline = true
+            .into(avatarView)
+        avatarView.clipToOutline = true
     }
 
     fun setOnEmojiClickListener(lambda: (String) -> Unit) {
@@ -121,24 +142,17 @@ class MessageViewGroup @JvmOverloads constructor(
     private fun initializeFlexBox() {
         val box = findViewById<FlexBoxLayout>(R.id.reactionFlexBox)
         val width =
-            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 45f, resources.displayMetrics)
-                .toInt()
+            marginToPx(45f)
         val height =
-            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30f, resources.displayMetrics)
-                .toInt()
+            marginToPx(30f)
         val mlp = MarginLayoutParams(width, height)
-        mlp.bottomMargin =
-            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5f, resources.displayMetrics)
-                .toInt()
+        mlp.bottomMargin = marginToPx(5f)
         mlp.topMargin =
-            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5f, resources.displayMetrics)
-                .toInt()
+            marginToPx(5f)
         mlp.leftMargin =
-            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5f, resources.displayMetrics)
-                .toInt()
+            marginToPx(5f)
         mlp.rightMargin =
-            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5f, resources.displayMetrics)
-                .toInt()
+            marginToPx(5f)
         val image = ImageView(context)
         image.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.plus_sign))
         image.background = AppCompatResources.getDrawable(context, R.drawable.add_emoji_bg)
@@ -148,4 +162,11 @@ class MessageViewGroup @JvmOverloads constructor(
         }
         box.addView(image)
     }
+
+    private fun marginToPx(margin: Float) =
+        TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            margin,
+            resources.displayMetrics
+        ).toInt()
 }

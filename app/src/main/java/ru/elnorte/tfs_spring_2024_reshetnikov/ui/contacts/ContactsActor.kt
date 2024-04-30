@@ -2,11 +2,12 @@ package ru.elnorte.tfs_spring_2024_reshetnikov.ui.contacts
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import ru.elnorte.tfs_spring_2024_reshetnikov.data.repository.UserRepository
-import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.OnlineStatus
+import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.ResponseState
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.mvi.MviActor
+import ru.elnorte.tfs_spring_2024_reshetnikov.ui.repository.IUserRepository
+import javax.inject.Inject
 
-class ContactsActor(private var repo: UserRepository) :
+class ContactsActor @Inject constructor(private var repo: IUserRepository) :
     MviActor<ContactsPartialState, ContactsIntent, ContactsState, ContactsEffect>() {
 
     override fun resolve(intent: ContactsIntent, state: ContactsState): Flow<ContactsPartialState> {
@@ -14,55 +15,34 @@ class ContactsActor(private var repo: UserRepository) :
             ContactsIntent.Init -> loadData()
             ContactsIntent.Update -> loadData()
             is ContactsIntent.FilterQuery -> queryFilter(intent.queryText)
-            is ContactsIntent.NavigateToPerson -> navigateToPerson(
-                intent.avatar,
-                intent.name,
-                intent.status,
-                intent.isOnline
-            )
         }
     }
-
 
     private fun queryFilter(queryText: String): Flow<ContactsPartialState> {
         return flow {
-            runCatching {
-                repo.queryContacts(queryText)
-            }.fold(
-                onSuccess = {
-                    emit(ContactsPartialState.Update(it))
-                },
-                onFailure = {
-                    _effects.emit(ContactsEffect.ShowError(it))
+            when (val contact = repo.queryContacts(queryText)) {
+                is ResponseState.Error -> {
+                    emit(ContactsPartialState.Update(emptyList()))
+                    _effects.emit(ContactsEffect.ShowError(contact.errorMessage))
                 }
-            )
-        }
-    }
 
-    private fun navigateToPerson(
-        avatar: String?,
-        name: String,
-        status: String,
-        online: OnlineStatus,
-    ): Flow<ContactsPartialState> {
-        return flow {
-            _effects.emit(ContactsEffect.NavigateToPerson(avatar, name, status, online))
+                is ResponseState.Success -> {
+                    emit(ContactsPartialState.Update(contact.data))
+                }
+            }
         }
     }
 
     private fun loadData(): Flow<ContactsPartialState> {
         return flow {
-            //todo repository must return state already
-            runCatching {
-                repo.getPeople()
-            }.fold(
-                onSuccess = {
-                    emit(ContactsPartialState.DataLoaded(it))
-                },
-                onFailure = {
-                    _effects.emit(ContactsEffect.ShowError(it))
+            when (val contact = repo.getPeople()) {
+                is ResponseState.Error -> {
+                    emit(ContactsPartialState.Update(emptyList()))
+                    _effects.emit(ContactsEffect.ShowError(contact.errorMessage))
                 }
-            )
+
+                is ResponseState.Success -> emit(ContactsPartialState.DataLoaded(contact.data))
+            }
         }
     }
 }

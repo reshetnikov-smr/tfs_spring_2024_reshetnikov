@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import ru.elnorte.tfs_spring_2024_reshetnikov.asDateString
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.MessageUiModel
 
-class CustomItemDecoration(private val marginSize: Int) : RecyclerView.ItemDecoration() {
+class CustomItemDecoration : RecyclerView.ItemDecoration() {
 
     private var list = listOf<MessageUiModel>()
     fun updateList(input: List<MessageUiModel>) {
@@ -23,24 +23,6 @@ class CustomItemDecoration(private val marginSize: Int) : RecyclerView.ItemDecor
     }
 
     private val dateBounds = Rect()
-    override fun getItemOffsets(
-        outRect: Rect,
-        view: View,
-        parent: RecyclerView,
-        state: RecyclerView.State
-    ) {
-        super.getItemOffsets(outRect, view, parent, state)
-        val position = parent.getChildAdapterPosition(view)
-        val isMine = list[position].isMineMessage
-        if (position == 0) {
-            outRect.top = marginSize
-        }
-        if (!isMine) {
-            outRect.right = marginSize
-        } else {
-            outRect.left = marginSize
-        }
-    }
 
     override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
         super.onDraw(c, parent, state)
@@ -51,17 +33,20 @@ class CustomItemDecoration(private val marginSize: Int) : RecyclerView.ItemDecor
         for (i in 0 until parent.childCount) {
             val view = parent.getChildAt(i)
             val position = parent.getChildAdapterPosition(view!!)
-            if (position == RecyclerView.NO_POSITION) {
-                continue
-            }
-            if (position == 0) {
-                drawDateHeader(c, view, parent)
-            }
-            if (position > 0 && list[position].timestamp.asDateString("dd MMM") != list[position - 1].timestamp.asDateString(
+            when {
+                position == RecyclerView.NO_POSITION -> {
+                    continue
+                }
+
+                position == 0 -> {
+                    drawDateHeader(c, view, parent)
+                }
+
+                position > 0 && list[position].timestamp.asDateString("dd MMM") != list[position - 1].timestamp.asDateString(
                     "dd MMM"
-                )
-            ) {
-                drawDateHeader(c, view, parent)
+                ) -> {
+                    drawDateHeader(c, view, parent)
+                }
             }
         }
     }

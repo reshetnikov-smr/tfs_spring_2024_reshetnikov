@@ -1,26 +1,25 @@
 package ru.elnorte.tfs_spring_2024_reshetnikov.ui.page
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.setFragmentResultListener
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import ru.elnorte.tfs_spring_2024_reshetnikov.MainActivity
+import ru.elnorte.tfs_spring_2024_reshetnikov.MainApplication
 import ru.elnorte.tfs_spring_2024_reshetnikov.R
-import ru.elnorte.tfs_spring_2024_reshetnikov.data.repository.ChannelRepository
-import ru.elnorte.tfs_spring_2024_reshetnikov.data.repository.MessageConverter
 import ru.elnorte.tfs_spring_2024_reshetnikov.databinding.PageFragmentBinding
 import ru.elnorte.tfs_spring_2024_reshetnikov.isSubscribed
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.channels.ChannelsFragmentDirections
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.TopicTransferModel
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.mvi.BaseFragmentMvi
-import ru.elnorte.tfs_spring_2024_reshetnikov.ui.mvi.MviStore
 import ru.elnorte.tfs_spring_2024_reshetnikov.utils.ISONLYSUBSCRIBEDARGUMENT
 import ru.elnorte.tfs_spring_2024_reshetnikov.utils.QUERY_TEXT_KEY
 import ru.elnorte.tfs_spring_2024_reshetnikov.utils.snackbarError
+import javax.inject.Inject
 
 class PageFragment :
     BaseFragmentMvi<
@@ -30,22 +29,35 @@ class PageFragment :
             PageEffect
             >(R.layout.page_fragment) {
 
-    private var _binding: PageFragmentBinding? = null
-    private val binding get() = _binding!!
+    private var fragmentBinding: PageFragmentBinding? = null
 
-    override val store: MviStore<
-            PagePartialState,
-            PageIntent,
-            PageState,
-            PageEffect
-            > by viewModels {
-        PageStoreFactory(
-            PageReducer(),
-            PageActor(ChannelRepository(MessageConverter()))
-        )
-    }
+    @Inject
+    lateinit var pageStore: PageStore
+
+    override val store: PageStore
+        get() = pageStore
 
     private lateinit var adapter: PageListAdapter
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        (requireActivity().application as MainApplication).appComponent
+            .channelComponent().create()
+            .injectPageFragment(this)
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View? {
+        val binding = PageFragmentBinding.inflate(inflater, container, false)
+        fragmentBinding = binding
+        newSetup(binding)
+        return binding.root
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,17 +68,7 @@ class PageFragment :
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?,
-    ): View {
-        _binding = PageFragmentBinding.inflate(inflater, container, false)
-        newSetup()
-        return binding.root
-    }
-
-    private fun newSetup() {
+    private fun newSetup(binding: PageFragmentBinding) {
         (requireActivity() as MainActivity).showBottomNav()
 
         adapter = PageListAdapter(PageClickListener({
@@ -91,48 +93,58 @@ class PageFragment :
                     )
             }
 
-            is PageEffect.ShowError -> snackbarError(requireView(), effect.throwable)
+            is PageEffect.ShowError -> snackbarError(
+                requireView(),
+                effect.throwable.message.orEmpty()
+            )
         }
     }
 
     override fun render(state: PageState) {
-        when (val dataToRender = state.pageUi) {
-            is PageUiState.Success -> {
-                adapter.submitList(dataToRender.data)
-                setShimmerHidden()
+        when (state) {
+            PageInit -> {
+                store.postIntent(PageIntent.Init(requireArguments().isSubscribed()))
             }
 
-            is PageUiState.Error -> {}
-            PageUiState.Loading -> {
+            PageLoading -> {
                 setShimmerVisible()
+            }
+
+            is PageSuccess -> {
+                adapter.submitList(state.list)
+                setShimmerHidden()
             }
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
+        fragmentBinding = null
     }
 
     private fun getQueryText(bundle: Bundle, key: String) {
-        val subscribedFlag = requireArguments().isSubscribed()
+        val iSubscribed = requireArguments().isSubscribed()
         bundle.getString(key)?.let {
-            store.postIntent(PageIntent.SendQuery(it, subscribedFlag))
+            store.postIntent(PageIntent.SendQuery(it, iSubscribed))
         }
     }
 
     private fun Bundle.fragmentIndex(): Int = getInt(ISONLYSUBSCRIBEDARGUMENT)
     private fun Bundle.isSubscribed(): Boolean = fragmentIndex().isSubscribed()
     private fun setShimmerVisible() {
-        binding.shimmerFragment.root.visibility = View.VISIBLE
-        binding.shimmerFragment.root.startShimmer()
-        binding.pageRecyclerView.visibility = View.GONE
+        fragmentBinding?.run {
+            shimmerFragment.root.visibility = View.VISIBLE
+            shimmerFragment.root.startShimmer()
+            pageRecyclerView.visibility = View.GONE
+        }
     }
 
     private fun setShimmerHidden() {
-        binding.shimmerFragment.root.stopShimmer()
-        binding.shimmerFragment.root.visibility = View.GONE
-        binding.pageRecyclerView.visibility = View.VISIBLE
+        fragmentBinding?.run {
+            shimmerFragment.root.stopShimmer()
+            shimmerFragment.root.visibility = View.GONE
+            pageRecyclerView.visibility = View.VISIBLE
+        }
     }
 
     companion object {

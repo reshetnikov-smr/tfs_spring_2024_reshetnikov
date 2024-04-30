@@ -46,8 +46,8 @@ class ContactsListAdapter(private val clickListener: ContactsClickListener) :
                     clickListener.onClick(item)
                 }
             }
-            item.avatar?.let {
-                val imgUri = it.toUri().buildUpon().scheme("https").build()
+            if (item.avatar != null) {
+                val imgUri = item.avatar.toUri().buildUpon().scheme("https").build()
                 Glide.with(binding.personsAvatar.context)
                     .load(imgUri)
                     .apply(
@@ -57,6 +57,8 @@ class ContactsListAdapter(private val clickListener: ContactsClickListener) :
                     )
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .into(binding.personsAvatar)
+            } else {
+                binding.personsAvatar.setImageResource(R.drawable.stub_avatar)
             }
         }
 

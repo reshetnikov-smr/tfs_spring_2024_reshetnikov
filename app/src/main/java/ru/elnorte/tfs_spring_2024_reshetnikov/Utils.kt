@@ -1,5 +1,6 @@
 package ru.elnorte.tfs_spring_2024_reshetnikov
 
+import android.content.res.Resources
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -28,7 +29,6 @@ fun provideEmojisList(): List<String> {
         "\uD83E\uDD21",
         "\uD83D\uDC40",
         "😌", "😇", "🎃",
-        String(Character.toChars("2049".toInt(radix = 16))),
     )
 }
 
@@ -43,6 +43,9 @@ fun Long.asDateString(pattern: String): String {
     val date = Date(this * 1000)
     return dateFormat.format(date)
 }
+
+val Int.dp: Int
+    get() = (this * Resources.getSystem().displayMetrics.density).toInt()
 
 
 fun EditText.afterTextChanged(action: (String) -> Unit) {

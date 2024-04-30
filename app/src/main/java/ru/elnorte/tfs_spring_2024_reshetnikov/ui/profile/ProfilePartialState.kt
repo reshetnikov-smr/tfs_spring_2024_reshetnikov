@@ -5,4 +5,6 @@ import ru.elnorte.tfs_spring_2024_reshetnikov.ui.mvi.MviPartialState
 
 sealed interface ProfilePartialState : MviPartialState {
     data class DataLoaded(val model: PersonUiModel) : ProfilePartialState
+    data object Error : ProfilePartialState
+    data object Loading : ProfilePartialState
 }

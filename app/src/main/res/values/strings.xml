@@ -31,4 +31,5 @@
     <string name="temp_search_text">Search...</string>
     <string name="temp_users_text">Users...</string>
     <string name="profile_text">Profile</string>
+    <string name="user_avatar_description">user avatar</string>
 </resources>

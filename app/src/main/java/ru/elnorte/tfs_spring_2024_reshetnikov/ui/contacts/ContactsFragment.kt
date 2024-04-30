@@ -1,36 +1,38 @@
 package ru.elnorte.tfs_spring_2024_reshetnikov.ui.contacts
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import ru.elnorte.tfs_spring_2024_reshetnikov.MainApplication
 import ru.elnorte.tfs_spring_2024_reshetnikov.R
 import ru.elnorte.tfs_spring_2024_reshetnikov.afterTextChanged
-import ru.elnorte.tfs_spring_2024_reshetnikov.data.repository.UserRepository
 import ru.elnorte.tfs_spring_2024_reshetnikov.databinding.ContactsFragmentBinding
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.PersonUiModel
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.mvi.BaseFragmentMvi
-import ru.elnorte.tfs_spring_2024_reshetnikov.ui.mvi.MviStore
 import ru.elnorte.tfs_spring_2024_reshetnikov.utils.snackbarError
+import javax.inject.Inject
 
 class ContactsFragment :
     BaseFragmentMvi<ContactsPartialState, ContactsIntent, ContactsState, ContactsEffect>(
         R.layout.contacts_fragment
     ) {
 
-    override val store: MviStore<
-            ContactsPartialState,
-            ContactsIntent,
-            ContactsState,
-            ContactsEffect
-            > by viewModels {
-        ContactsStoreFactory(
-            ContactsReducer(),
-            ContactsActor(UserRepository())
-        )
+    @Inject
+    lateinit var contactStore: ContactsStore
+
+    override val store
+        get() = contactStore
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        (requireActivity().application as MainApplication).appComponent
+            .contactComponent().create()
+            .inject(this)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -47,7 +49,10 @@ class ContactsFragment :
 
     override fun resolveEffect(effect: ContactsEffect) {
         when (effect) {
-            is ContactsEffect.ShowError -> snackbarError(requireView(), effect.throwable)
+            is ContactsEffect.ShowError -> snackbarError(
+                requireView(),
+                effect.message
+            )
 
             is ContactsEffect.NavigateToPerson -> this.findNavController().navigate(
                 ContactsFragmentDirections.actionToPerson(
@@ -97,8 +102,8 @@ class ContactsFragment :
     private fun setupAndInit() {
         adapter = ContactsListAdapter(
             ContactsClickListener {
-                store.postIntent(
-                    ContactsIntent.NavigateToPerson(
+                resolveEffect(
+                    ContactsEffect.NavigateToPerson(
                         it.avatar,
                         it.name,
                         it.status,

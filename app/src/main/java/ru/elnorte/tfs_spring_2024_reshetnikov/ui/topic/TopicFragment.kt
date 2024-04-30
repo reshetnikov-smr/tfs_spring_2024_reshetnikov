@@ -1,59 +1,60 @@
 package ru.elnorte.tfs_spring_2024_reshetnikov.ui.topic
 
+import android.content.Context
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.addCallback
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import ru.elnorte.tfs_spring_2024_reshetnikov.MainActivity
+import ru.elnorte.tfs_spring_2024_reshetnikov.MainApplication
 import ru.elnorte.tfs_spring_2024_reshetnikov.R
-import ru.elnorte.tfs_spring_2024_reshetnikov.data.repository.ChannelRepository
-import ru.elnorte.tfs_spring_2024_reshetnikov.data.repository.MessageConverter
+import ru.elnorte.tfs_spring_2024_reshetnikov.afterTextChanged
 import ru.elnorte.tfs_spring_2024_reshetnikov.databinding.ChatFragmentBinding
-import ru.elnorte.tfs_spring_2024_reshetnikov.ellog
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.MessageUiModel
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.mvi.BaseFragmentMvi
-import ru.elnorte.tfs_spring_2024_reshetnikov.ui.mvi.MviStore
 import ru.elnorte.tfs_spring_2024_reshetnikov.unicodeEmojiToHexString
 import ru.elnorte.tfs_spring_2024_reshetnikov.utils.getEmojiNameByUnicode
 import ru.elnorte.tfs_spring_2024_reshetnikov.utils.snackbarError
+import javax.inject.Inject
 
 class TopicFragment : BaseFragmentMvi<
         TopicPartialState,
         TopicIntent,
         TopicState,
         TopicEffect
-        >(R.layout.chat_fragment) {
+        >(R.layout.chat_fragment), EmojiCallback {
 
-    private var _binding: ChatFragmentBinding? = null
-    private val binding get() = _binding!!
+    private var fragmentBinding: ChatFragmentBinding? = null
+
+    @Inject
+    lateinit var topicStore: TopicStore
+
+    override val store: TopicStore
+        get() = topicStore
+
     private lateinit var adapter: MessageListAdapter
-
-    override val store: MviStore<
-            TopicPartialState,
-            TopicIntent,
-            TopicState,
-            TopicEffect
-            > by viewModels {
-        TopicStoreFactory(
-            TopicReducer(),
-            TopicActor(ChannelRepository(MessageConverter()))
-        )
-    }
     private lateinit var itemDecoration: CustomItemDecoration
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        (requireActivity().application as MainApplication).appComponent
+            .chatComponent().create()
+            .inject(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requireActivity().onBackPressedDispatcher.addCallback(this) {
-            store.postIntent(TopicIntent.NavigateBack)
-        }
+        fetchData()
     }
 
     override fun onCreateView(
@@ -61,68 +62,85 @@ class TopicFragment : BaseFragmentMvi<
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = ChatFragmentBinding.inflate(inflater, container, false)
+        val binding = ChatFragmentBinding.inflate(inflater, container, false)
+        fragmentBinding = binding
         newSetup()
-
         return binding.root
+    }
+
+    override fun render(state: TopicState) {
+        when (state) {
+            is TopicSuccess -> {
+                val data = state.data
+                fragmentBinding?.manageSendButton(state.data.messageState)
+                updateList(data.messages, state.showLastMessage)
+            }
+
+            else -> {}
+        }
     }
 
     override fun resolveEffect(effect: TopicEffect) {
         when (effect) {
             is TopicEffect.ShowEmojiDialog -> {
-                EmojiEntryDialogFragment {
-                    store.postIntent(
-                        TopicIntent.AddReaction(
-                            effect.messageId, getEmojiNameByUnicode(
-                                unicodeEmojiToHexString(it)
-                            )
-                        )
-                    )
-                }.show(childFragmentManager, "tag")
+                EmojiEntryDialogFragment.newInstance(effect.messageId)
+                    .show(childFragmentManager, "TopicFragment")
             }
 
-            is TopicEffect.ShowError -> snackbarError(requireView(), effect.throwable)
-            TopicEffect.NavigateBack -> findNavController().navigate(TopicFragmentDirections.actionTopicFragmentToChannelsFragment())
-        }
-    }
+            is TopicEffect.ShowError -> snackbarError(
+                requireView(),
+                effect.throwableMessage
+            )
 
-    override fun render(state: TopicState) {
-        when (val dataToRender = state.topicUi) {
-            is TopicUiState.Success -> {
-                val data = dataToRender.data
-                binding.chatScreenMessageActionImage.setImageDrawable(
-                    if (data.messageState == MessageState.SEND_FILE) {
-                        AppCompatResources.getDrawable(
-                            requireContext(),
-                            R.drawable.add_file_image
-                        )
-                    } else {
-                        AppCompatResources.getDrawable(
-                            requireContext(),
-                            R.drawable.send_message_image
-                        )
-                    }
+            TopicEffect.DownToList -> {
+                fragmentBinding?.chatScreenRecyclerView?.smoothScrollToPosition(
+                    adapter.itemCount - 1
                 )
-                updateList(data.messages)
-            }
-
-            is TopicUiState.Error -> {
-            }
-
-            TopicUiState.Loading -> {
             }
         }
     }
 
-    private fun updateList(messages: List<MessageUiModel>) {
-        adapter.submitList(messages)
-        itemDecoration.updateList(messages)
+    override fun onSelectEmoji(emoji: String, messageId: Int) {
+        store.postIntent(
+            TopicIntent.AddReaction(
+                messageId, getEmojiNameByUnicode(
+                    unicodeEmojiToHexString(emoji)
+                )
+            )
+        )
+    }
 
+    private fun ChatFragmentBinding.manageSendButton(messageState: MessageState) {
+        chatScreenMessageActionImage.setImageDrawable(
+            if (messageState == MessageState.SEND_FILE) {
+                AppCompatResources.getDrawable(
+                    requireContext(),
+                    R.drawable.add_file_image
+                )
+            } else {
+                AppCompatResources.getDrawable(
+                    requireContext(),
+                    R.drawable.send_message_image
+                )
+            }
+        )
+    }
+
+    private fun updateList(
+        messages: List<MessageUiModel>,
+        showLastMessage: Boolean,
+    ) {
+        adapter.submitList(messages) {
+            if (showLastMessage) {
+                resolveEffect(TopicEffect.DownToList)
+            }
+        }
+        itemDecoration.updateList(messages)
     }
 
     override fun onDestroyView() {
+        fragmentBinding = null
         super.onDestroyView()
-        _binding = null
     }
 
     private fun newSetup() {
@@ -136,7 +154,6 @@ class TopicFragment : BaseFragmentMvi<
                 },
                 emojiClickListener = { emo, mesId, isSelected ->
                     if (isSelected) {
-                        ellog("is selected true")
                         store.postIntent(
                             TopicIntent.RemoveReaction(
                                 mesId, getEmojiNameByUnicode(
@@ -145,7 +162,6 @@ class TopicFragment : BaseFragmentMvi<
                             )
                         )
                     } else {
-                        ellog("is selected false")
                         store.postIntent(
                             TopicIntent.AddReaction(
                                 mesId, getEmojiNameByUnicode(
@@ -160,49 +176,40 @@ class TopicFragment : BaseFragmentMvi<
                 },
             )
         )
-        val marginSize = resources.getDimensionPixelSize(R.dimen.margin_humongous)
 
-        itemDecoration = CustomItemDecoration(marginSize)
-        binding.chatScreenRecyclerView.addItemDecoration(itemDecoration)
+        itemDecoration = CustomItemDecoration()
+        fragmentBinding?.run {
+            chatScreenRecyclerView.addItemDecoration(itemDecoration)
 
-        binding.chatScreenRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        binding.chatScreenRecyclerView.adapter = adapter
+            chatScreenRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+            chatScreenRecyclerView.adapter = adapter
 
-        binding.toolbar.setupWithNavController(findNavController())
-        binding.toolbar.setNavigationOnClickListener { store.postIntent(TopicIntent.NavigateBack) }
-        binding.toolbar.title = ""
-        binding.toolbarTitle.text = arguments.topicName
-
-        binding.chatScreenInputMessageEditText.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(
-                s: CharSequence?,
-                start: Int,
-                before: Int,
-                count: Int,
-            ) {
+            toolbar.setupWithNavController(findNavController())
+            toolbar.title = ""
+            toolbarTitle.text = arguments.topicName
+            chatScreenMessageActionImage.setOnClickListener {
+                store.postIntent(
+                    TopicIntent.ActionButtonClickIntent(
+                        chatScreenInputMessageEditText.text.toString()
+                    )
+                )
+                chatScreenInputMessageEditText.text.clear()
             }
 
-            override fun onTextChanged(
-                s: CharSequence?,
-                start: Int,
-                before: Int,
-                count: Int,
-            ) {
+            chatScreenInputMessageEditText.afterTextChanged {
+                store.postIntent(TopicIntent.TextEnteredIntent(it.isEmpty()))
             }
+        }
+    }
 
-            override fun afterTextChanged(s: Editable?) {
-                if (s.toString() == "") {
-                    store.postIntent(TopicIntent.TextEnteredIntent(isEmpty = true))
-                } else {
-                    store.postIntent(TopicIntent.TextEnteredIntent(isEmpty = false))
+    private fun fetchData() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                while (true) {
+                    delay(3000)
+                    store.postIntent(TopicIntent.ReloadPage)
                 }
-
             }
-        })
-
-        binding.chatScreenMessageActionImage.setOnClickListener {
-            store.postIntent(TopicIntent.ActionButtonClickIntent(binding.chatScreenInputMessageEditText.text.toString()))
-            binding.chatScreenInputMessageEditText.text.clear()
         }
     }
 }

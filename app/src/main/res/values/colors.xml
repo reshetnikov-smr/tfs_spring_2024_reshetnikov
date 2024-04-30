@@ -18,4 +18,6 @@
     <color name="email">#A1A1A1</color>
     <color name="navigationUnchecked">#919191</color>
     <color name="background_app_bar">#1E1E1E</color>
+    <color name="meMessageStartColor">#2A9D8F</color>
+    <color name="meMessageEndColor">#006153</color>
 </resources>

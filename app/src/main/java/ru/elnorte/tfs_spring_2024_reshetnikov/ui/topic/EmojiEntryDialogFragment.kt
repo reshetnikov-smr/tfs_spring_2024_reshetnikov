@@ -6,22 +6,24 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.os.bundleOf
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import ru.elnorte.tfs_spring_2024_reshetnikov.R
 import ru.elnorte.tfs_spring_2024_reshetnikov.databinding.EmojiEntryBottomSheetLayoutBinding
 import ru.elnorte.tfs_spring_2024_reshetnikov.provideEmojisList
 
-class EmojiEntryDialogFragment(var onSelectEmoji: (String) -> Unit) : BottomSheetDialogFragment() {
+class EmojiEntryDialogFragment : BottomSheetDialogFragment() {
 
     private lateinit var binding: EmojiEntryBottomSheetLayoutBinding
+    private lateinit var callback: EmojiCallback
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         binding = EmojiEntryBottomSheetLayoutBinding.inflate(inflater, container, false)
         binding.root.setBackgroundColor(resources.getColor(R.color.container, null))
-
+        callback = parentFragment as TopicFragment
         return binding.root
     }
 
@@ -77,4 +79,25 @@ class EmojiEntryDialogFragment(var onSelectEmoji: (String) -> Unit) : BottomShee
             binding.bottomSheetMainTable.addView(item)
         }
     }
+
+    private fun onSelectEmoji(emoji: String) {
+        arguments?.let {
+            callback.onSelectEmoji(emoji, it.getInt(MESSAGE_ID_ARG))
+        }
+    }
+
+    companion object {
+
+        private const val MESSAGE_ID_ARG = "arg_message_id"
+        fun newInstance(messageId: Int): EmojiEntryDialogFragment {
+            val args = bundleOf(MESSAGE_ID_ARG to messageId)
+            return EmojiEntryDialogFragment().apply {
+                arguments = args
+            }
+        }
+    }
+}
+
+interface EmojiCallback {
+    fun onSelectEmoji(emoji: String, messageId: Int)
 }

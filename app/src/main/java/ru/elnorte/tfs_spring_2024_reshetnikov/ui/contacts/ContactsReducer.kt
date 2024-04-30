@@ -2,8 +2,9 @@ package ru.elnorte.tfs_spring_2024_reshetnikov.ui.contacts
 
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.PersonUiModel
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.mvi.MviReducer
+import javax.inject.Inject
 
-class ContactsReducer : MviReducer<ContactsPartialState, ContactsState> {
+class ContactsReducer @Inject constructor() : MviReducer<ContactsPartialState, ContactsState> {
     override fun reduce(
         prevState: ContactsState,
         partialState: ContactsPartialState,
@@ -18,6 +19,6 @@ class ContactsReducer : MviReducer<ContactsPartialState, ContactsState> {
         prevState: ContactsState,
         personUi: List<PersonUiModel>,
     ): ContactsState {
-        return prevState.copy(ContactsUiState.Success(personUi))
+        return prevState.copy(contactsUi = ContactsUiState.Success(personUi))
     }
 }

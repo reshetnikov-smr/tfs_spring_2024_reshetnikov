@@ -1,21 +1,22 @@
 package ru.elnorte.tfs_spring_2024_reshetnikov.ui.page
 
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.mvi.MviReducer
+import javax.inject.Inject
 
-class PageReducer : MviReducer<PagePartialState, PageState> {
+class PageReducer @Inject constructor() : MviReducer<PagePartialState, PageState> {
     override fun reduce(
         prevState: PageState,
         partialState: PagePartialState,
     ): PageState {
         return when (partialState) {
-            is PagePartialState.DataLoaded -> updatePageInState(prevState, partialState.model)
+            is PagePartialState.DataLoaded -> updatePageInState(partialState.model)
+            PagePartialState.Loading -> PageLoading
         }
     }
 
     private fun updatePageInState(
-        prevState: PageState,
         pageUi: List<PageItem>,
     ): PageState {
-        return prevState.copy(pageUi = PageUiState.Success(pageUi))
+        return PageSuccess(pageUi)
     }
 }

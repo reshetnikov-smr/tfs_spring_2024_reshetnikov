@@ -5,9 +5,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import ru.elnorte.tfs_spring_2024_reshetnikov.di.MainAnnotation
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.mvi.MviStore
+import javax.inject.Inject
 
-class ContactsStore(reducer: ContactsReducer, actor: ContactsActor) :
+@MainAnnotation.ContactScope
+class ContactsStore @Inject constructor(reducer: ContactsReducer, actor: ContactsActor) :
     MviStore<ContactsPartialState, ContactsIntent, ContactsState, ContactsEffect>(reducer, actor) {
     override fun initialStateCreator(): ContactsState = ContactsState(ContactsUiState.Loading)
     private var queryText: String = ""

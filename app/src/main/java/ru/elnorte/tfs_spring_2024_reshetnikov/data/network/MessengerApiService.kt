@@ -1,14 +1,6 @@
 package ru.elnorte.tfs_spring_2024_reshetnikov.data.network
 
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import okhttp3.Credentials
-import okhttp3.Interceptor
-import okhttp3.OkHttpClient
 import retrofit2.Call
-import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
-import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.DELETE
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -26,61 +18,29 @@ import ru.elnorte.tfs_spring_2024_reshetnikov.data.network.models.SubscribedStre
 import ru.elnorte.tfs_spring_2024_reshetnikov.data.network.models.TopicsResponse
 import ru.elnorte.tfs_spring_2024_reshetnikov.data.network.models.UserPresenceResponse
 import ru.elnorte.tfs_spring_2024_reshetnikov.data.network.models.UsersPresenceResponse
-import ru.elnorte.tfs_spring_2024_reshetnikov.utils.BASE_URL
 
 
-const val API_KEY = "Z5cfmzT3hpgeHxjIr4DSbgXYMDyAY8kG"  //tfschat
+const val API_KEY = "Z5cfmzT3hpgeHxjIr4DSbgXYMDyAY8kG"
 const val AUTH_MAIL = "elnortemobile@gmail.com"
-
-private val moshi = Moshi.Builder()
-    .add(KotlinJsonAdapterFactory())
-    .build()
-
-private val authInterceptor = Interceptor { chain ->
-    val credentials = Credentials.basic(AUTH_MAIL, API_KEY)
-    val newRequest = chain.request()
-        .newBuilder()
-        .addHeader("Authorization", credentials)
-        .build()
-    chain.proceed(newRequest)
-
-}
-
-
-private val internetClient = OkHttpClient().newBuilder()
-    .addInterceptor(authInterceptor)
-    .build()
-
-private val retrofit = Retrofit.Builder()
-    .client(internetClient)
-    .addConverterFactory(MoshiConverterFactory.create(moshi))
-    .baseUrl(BASE_URL)
-    .build()
-
-private val retrofitScalar = Retrofit.Builder()
-    .client(internetClient)
-    .addConverterFactory(ScalarsConverterFactory.create())
-    .baseUrl(BASE_URL)
-    .build()
 
 interface MessengerApiService {
     @GET("users")
-    suspend fun getUsers(): PeopleResponse
+    fun getUsers(): Call<PeopleResponse>
 
     @GET("users/{userId}/presence")
-    suspend fun getUserPresence(@Path("userId") userId: Int): UserPresenceResponse
+    fun getUserPresence(@Path("userId") userId: Int): UserPresenceResponse
 
     @GET("realm/presence")
-    suspend fun getUsersPresence(): UsersPresenceResponse
+    fun getUsersPresence(): Call<UsersPresenceResponse>
 
     @GET("users/me/subscriptions")
-    suspend fun getSubscribedStreams(): SubscribedStreamsResponse
+    fun getSubscribedStreams(): Call<SubscribedStreamsResponse>
 
     @GET("streams")
-    suspend fun getStreams(): StreamsResponse
+    fun getStreams(): Call<StreamsResponse>
 
     @GET("users/me/{streamId}/topics")
-    suspend fun getTopics(@Path("streamId") streamId: Int): TopicsResponse
+    fun getTopics(@Path("streamId") streamId: Int): Call<TopicsResponse>
 
     @GET("messages")
     fun getMessages(
@@ -96,7 +56,7 @@ interface MessengerApiService {
         @Field("type") type: String = "stream",
         @Field("to") to: String,
         @Field("topic") topic: String,
-        @Field("content") content: String
+        @Field("content") content: String,
     ): Call<MessageSendingResponse>
 
     @FormUrlEncoded
@@ -104,27 +64,22 @@ interface MessengerApiService {
     fun sendDirectMessage(
         @Field("type") type: String,
         @Field("to") to: String,
-        @Field("content") content: String
+        @Field("content") content: String,
     ): Call<MessageSendingResponse>
 
     @FormUrlEncoded
     @POST("messages/{messageId}/reactions")
     fun addEmoji(
         @Path("messageId") messageId: Int,
-        @Field("emoji_name") emojiName: String
+        @Field("emoji_name") emojiName: String,
     ): Call<GenericResponse>
 
     @DELETE("messages/{messageId}/reactions")
-    suspend fun removeEmoji(
+    fun removeEmoji(
         @Path("messageId") messageId: Int,
-        @Query("emoji_name") emojiName: String
-    ): GenericResponse
+        @Query("emoji_name") emojiName: String,
+    ): Call<GenericResponse>
 
     @GET("users/me")
-    suspend fun getMineUser(): MineUserResponse
-
-}
-
-object MessengerApi {
-    val retrofitService: MessengerApiService by lazy { retrofit.create(MessengerApiService::class.java) }
+    fun getMineUser(): Call<MineUserResponse>
 }

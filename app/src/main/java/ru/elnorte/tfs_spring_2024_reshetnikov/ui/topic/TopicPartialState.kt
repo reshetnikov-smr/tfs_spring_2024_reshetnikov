@@ -9,4 +9,5 @@ sealed interface TopicPartialState : MviPartialState {
     data class MessagesLoaded(val model: List<MessageUiModel>) : TopicPartialState
     data class ActionButtonChanged(val isSend: Boolean) : TopicPartialState
     data object NoChanges : TopicPartialState
+    data class MessagesSent(val messages: List<MessageUiModel>) : TopicPartialState
 }

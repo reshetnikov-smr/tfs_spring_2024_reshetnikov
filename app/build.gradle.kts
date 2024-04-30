@@ -1,9 +1,37 @@
+import Build_gradle.Versions.appcompat
+import Build_gradle.Versions.constraintlayout
+import Build_gradle.Versions.dagger
+import Build_gradle.Versions.glide
+import Build_gradle.Versions.lifecycle
+import Build_gradle.Versions.livedata
+import Build_gradle.Versions.material
+import Build_gradle.Versions.moshi
+import Build_gradle.Versions.navigation
+import Build_gradle.Versions.retrofit
+import Build_gradle.Versions.shimmer
+import Build_gradle.Versions.viewpager
 
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("com.google.devtools.ksp").version("1.6.10-1.0.4")
+    id("com.google.devtools.ksp").version("1.9.23-1.0.20")
     id("androidx.navigation.safeargs")
+}
+
+object Versions {
+    const val kotlin = "1.12.0"
+    const val appcompat = "1.6.1"
+    const val material = "1.11.0"
+    const val constraintlayout = "2.1.4"
+    const val navigation = "2.7.7"
+    const val viewpager = "1.0.0"
+    const val livedata = "2.7.0"
+    const val lifecycle = "2.2.0"
+    const val shimmer = "0.5.0"
+    const val retrofit = "2.9.0"
+    const val moshi = "1.15.0"
+    const val glide = "4.16.0"
+    const val dagger = "2.51.1"
 }
 
 android {
@@ -41,21 +69,7 @@ android {
     }
 }
 
-
 dependencies {
-    val kotlin = "1.12.0"
-    val appcompat = "1.6.1"
-    val material = "1.11.0"
-    val constraintlayout = "2.1.4"
-    val navigation = "2.7.7"
-    val viewpager = "1.0.0"
-    val livedata = "2.7.0"
-    val lifecycle = "2.2.0"
-    val shimmer = "0.5.0"
-    val retrofit = "2.9.0"
-    val moshi = "1.15.0"
-    val glide = "4.16.0"
-
     implementation("androidx.core:core-ktx:$kotlin")
     implementation("androidx.appcompat:appcompat:$appcompat")
     implementation("com.google.android.material:material:$material")
@@ -85,4 +99,7 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:$glide")
     annotationProcessor("com.github.bumptech.glide:compiler:$glide")
     ksp("com.github.bumptech.glide:compiler:$glide")
+
+    implementation("com.google.dagger:dagger:$dagger")
+    ksp("com.google.dagger:dagger-compiler:$dagger")
 }

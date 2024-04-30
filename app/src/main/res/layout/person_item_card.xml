@@ -13,9 +13,10 @@
         android:layout_width="@dimen/persons_avatar_size"
         android:layout_height="@dimen/persons_avatar_size"
         android:background="@drawable/round_bg"
+        android:contentDescription="@string/user_avatar_description"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/regular_avatar"
+        app:srcCompat="@drawable/stub_avatar"
         tools:clipToOutline="true" />
 
     <TextView
@@ -23,8 +24,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_increased"
-        android:fontFamily="@font/inter"
         android:ellipsize="end"
+        android:fontFamily="@font/inter"
         android:maxLines="1"
         android:text="@string/sample_name"
         android:textColor="@color/onContainer"

@@ -1,32 +1,34 @@
 package ru.elnorte.tfs_spring_2024_reshetnikov.data.repository
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import ru.elnorte.tfs_spring_2024_reshetnikov.data.network.MessengerApi
-import ru.elnorte.tfs_spring_2024_reshetnikov.data.network.models.UsersMapper
 import ru.elnorte.tfs_spring_2024_reshetnikov.data.network.models.asPersonUiModel
+import ru.elnorte.tfs_spring_2024_reshetnikov.data.remote.ProfileRemoteSource
+import ru.elnorte.tfs_spring_2024_reshetnikov.di.MainAnnotation
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.PersonUiModel
+import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.ResponseState
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.repository.IUserRepository
 
-class UserRepository : IUserRepository {
-    override suspend fun getPeople(): List<PersonUiModel> {
-        return withContext(Dispatchers.IO) {
-            val data = MessengerApi.retrofitService.getUsers()
-            val presence = MessengerApi.retrofitService.getUsersPresence()
-            val output = UsersMapper(data, presence)
-            output.sortedBy { it.isOnline }
+@MainAnnotation.ProfileScope
+class UserRepository(private val remote: ProfileRemoteSource) : IUserRepository {
+    override suspend fun getPeople(): ResponseState<List<PersonUiModel>> {
+        return remote.getPeople()
+    }
+
+    override suspend fun getMe(): ResponseState<PersonUiModel> {
+        return when (val remoteData = remote.getMe()) {
+            is ResponseState.Error -> remoteData
+            is ResponseState.Success -> ResponseState.Success(remoteData.data.asPersonUiModel())
         }
     }
 
-    override suspend fun getMe(): PersonUiModel {
-        val data = MessengerApi.retrofitService.getMineUser()
-        return data.asPersonUiModel()
-    }
-
-    override suspend fun queryContacts(queryText: String): List<PersonUiModel> {
-        return getPeople().filter {
-            it.name.contains(queryText)
+    override suspend fun queryContacts(queryText: String): ResponseState<List<PersonUiModel>> {
+        return when (val contacts = getPeople()) {
+            is ResponseState.Error -> contacts
+            is ResponseState.Success -> {
+                val filtered = contacts.data.filter {
+                    it.name.contains(queryText, true)
+                }
+                ResponseState.Success(filtered)
+            }
         }
     }
-
 }
