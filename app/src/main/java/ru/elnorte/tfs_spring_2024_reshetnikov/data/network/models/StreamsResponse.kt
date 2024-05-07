@@ -3,6 +3,7 @@ package ru.elnorte.tfs_spring_2024_reshetnikov.data.network.models
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import ru.elnorte.tfs_spring_2024_reshetnikov.data.local.entities.ChannelEntity
 import ru.elnorte.tfs_spring_2024_reshetnikov.data.models.ChannelDatabaseModel
 
 @JsonClass(generateAdapter = true)
@@ -51,6 +52,14 @@ fun StreamsResponse.asChannelsDatabaseModel(): List<ChannelDatabaseModel> {
     val output = mutableListOf<ChannelDatabaseModel>()
     this.streams.forEach {
         output.add(ChannelDatabaseModel(it.streamId, it.name, it.description, listOf()))
+    }
+    return output
+}
+
+fun StreamsResponse.asChannelEntity(): List<ChannelEntity> {
+    val output = mutableListOf<ChannelEntity>()
+    this.streams.forEach {
+        output.add(ChannelEntity(it.streamId, it.name, it.description))
     }
     return output
 }

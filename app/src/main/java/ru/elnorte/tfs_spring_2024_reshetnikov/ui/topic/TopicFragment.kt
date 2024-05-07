@@ -12,6 +12,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.elnorte.tfs_spring_2024_reshetnikov.MainActivity
@@ -19,6 +20,7 @@ import ru.elnorte.tfs_spring_2024_reshetnikov.MainApplication
 import ru.elnorte.tfs_spring_2024_reshetnikov.R
 import ru.elnorte.tfs_spring_2024_reshetnikov.afterTextChanged
 import ru.elnorte.tfs_spring_2024_reshetnikov.databinding.ChatFragmentBinding
+import ru.elnorte.tfs_spring_2024_reshetnikov.ellog
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.MessageUiModel
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.mvi.BaseFragmentMvi
 import ru.elnorte.tfs_spring_2024_reshetnikov.unicodeEmojiToHexString
@@ -64,7 +66,6 @@ class TopicFragment : BaseFragmentMvi<
     ): View {
         val binding = ChatFragmentBinding.inflate(inflater, container, false)
         fragmentBinding = binding
-        newSetup()
         return binding.root
     }
 
@@ -74,9 +75,17 @@ class TopicFragment : BaseFragmentMvi<
                 val data = state.data
                 fragmentBinding?.manageSendButton(state.data.messageState)
                 updateList(data.messages, state.showLastMessage)
+                hideLoadingImage()
             }
 
-            else -> {}
+            TopicInit -> {
+                newSetup()
+                showLoadingImage()
+            }
+
+            TopicError -> {
+                hideLoadingImage()
+            }
         }
     }
 
@@ -130,10 +139,12 @@ class TopicFragment : BaseFragmentMvi<
         messages: List<MessageUiModel>,
         showLastMessage: Boolean,
     ) {
+        ellog("size ${messages.size}")
         adapter.submitList(messages) {
-            if (showLastMessage) {
+            if (showLastMessage && messages.isNotEmpty()) {
                 resolveEffect(TopicEffect.DownToList)
             }
+            store.postIntent(TopicIntent.ListSubmitted(true))
         }
         itemDecoration.updateList(messages)
     }
@@ -200,6 +211,28 @@ class TopicFragment : BaseFragmentMvi<
                 store.postIntent(TopicIntent.TextEnteredIntent(it.isEmpty()))
             }
         }
+        updateListSize()
+    }
+
+    private fun updateListSize() {
+        fragmentBinding?.run {
+            chatScreenRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+
+                    val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+
+                    if (firstVisibleItemPosition <= 5) {
+                        increaseLoadListSize()
+                    }
+                }
+            })
+        }
+    }
+
+    private fun increaseLoadListSize() {
+        store.postIntent(TopicIntent.LoadMoreItems)
     }
 
     private fun fetchData() {
@@ -210,6 +243,20 @@ class TopicFragment : BaseFragmentMvi<
                     store.postIntent(TopicIntent.ReloadPage)
                 }
             }
+        }
+    }
+
+    private fun showLoadingImage() {
+        fragmentBinding?.run {
+            chatScreenRecyclerView.visibility = View.GONE
+            shimmerImage.visibility = View.VISIBLE
+        }
+    }
+
+    private fun hideLoadingImage() {
+        fragmentBinding?.run {
+            chatScreenRecyclerView.visibility = View.VISIBLE
+            shimmerImage.visibility = View.GONE
         }
     }
 }

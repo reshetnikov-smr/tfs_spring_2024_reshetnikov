@@ -7,5 +7,5 @@ import javax.inject.Inject
 @MainAnnotation.ChatScope
 class TopicStore @Inject constructor(reducer: TopicReducer, actor: TopicActor) :
     MviStore<TopicPartialState, TopicIntent, TopicState, TopicEffect>(reducer, actor) {
-    override fun initialStateCreator(): TopicState = TopicLoading
+    override fun initialStateCreator(): TopicState = TopicInit
 }

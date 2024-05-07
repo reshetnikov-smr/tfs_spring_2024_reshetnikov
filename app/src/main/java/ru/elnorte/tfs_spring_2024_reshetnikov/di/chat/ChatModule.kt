@@ -4,6 +4,8 @@ import ChatRepository
 import dagger.Module
 import dagger.Provides
 import ru.elnorte.tfs_spring_2024_reshetnikov.data.convert.MessageConverter
+import ru.elnorte.tfs_spring_2024_reshetnikov.data.local.ChatLocalSourceImpl
+import ru.elnorte.tfs_spring_2024_reshetnikov.data.local.dao.ChatDao
 import ru.elnorte.tfs_spring_2024_reshetnikov.data.network.MessengerApiService
 import ru.elnorte.tfs_spring_2024_reshetnikov.data.remote.ChatRemoteSourceImpl
 import ru.elnorte.tfs_spring_2024_reshetnikov.di.MainAnnotation
@@ -21,8 +23,12 @@ import ru.elnorte.tfs_spring_2024_reshetnikov.ui.topic.TopicStore
 class ChatModule {
     @Provides
     @MainAnnotation.ChatScope
-    fun provideRepository(api: MessengerApiService): IChatRepository {
-        return ChatRepository(MessageConverter(), ChatRemoteSourceImpl(api))
+    fun provideRepository(api: MessengerApiService, dao: ChatDao): IChatRepository {
+        return ChatRepository(
+            MessageConverter(),
+            ChatRemoteSourceImpl(api),
+            ChatLocalSourceImpl(dao)
+        )
     }
 
     @Provides

@@ -3,6 +3,7 @@ package ru.elnorte.tfs_spring_2024_reshetnikov.data.network.models
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import ru.elnorte.tfs_spring_2024_reshetnikov.data.local.entities.TopicEntity
 import ru.elnorte.tfs_spring_2024_reshetnikov.data.models.TopicDatabaseModel
 
 @JsonClass(generateAdapter = true)
@@ -27,6 +28,14 @@ fun TopicsResponse.asTopicsDatabaseModel(): List<TopicDatabaseModel> {
     val output = mutableListOf<TopicDatabaseModel>()
     this.topics.forEach {
         output.add(TopicDatabaseModel(0, it.name, 0, "#2A9D8F"))
+    }
+    return output
+}
+
+fun TopicsResponse.asTopicEntity(channelId: Int): List<TopicEntity> {
+    val output = mutableListOf<TopicEntity>()
+    this.topics.forEach {
+        output.add(TopicEntity(name = it.name, messagesCount = 0, parentId = channelId))
     }
     return output
 }

@@ -13,18 +13,39 @@ class PageActor @Inject constructor(private var repo: IChannelRepository) :
     MviActor<PagePartialState, PageIntent, PageState, PageEffect>() {
 
     private var channelsList = mutableListOf<PageItem>()
+    private var currentQueryText: String = ""
+
     override fun resolve(intent: PageIntent, state: PageState): Flow<PagePartialState> {
         return when (intent) {
             is PageIntent.ChannelItemClick -> channelItemClick(intent.channelId)
             is PageIntent.SendQuery -> sendQuery(intent.queryText, intent.isSubscribedOnly)
-            is PageIntent.Init -> getAllStreams(intent.isSubscribedOnly)
+            is PageIntent.Init -> initStreams(intent.isSubscribedOnly)
         }
     }
 
-    private fun getAllStreams(subscribedOnly: Boolean): Flow<PagePartialState> {
+
+    private fun initStreams(subscribedOnly: Boolean): Flow<PagePartialState> {
         currentQueryText = ""
         return flow {
-            handleQuery(subscribedOnly, currentQueryText)
+            getStreams(subscribedOnly, currentQueryText, true)
+        }
+    }
+
+    private suspend fun FlowCollector<PagePartialState>.getStreams(
+        subscribedOnly: Boolean,
+        queryText: String,
+        isFirst: Boolean = false,
+    ) {
+        if (subscribedOnly) {
+            repo.querySubscribedChannels(queryText, isFirst).collect {
+                updateInitList(it)
+                emit(PagePartialState.DataLoaded(it.toPageItem()))
+            }
+        } else {
+            repo.queryChannels(queryText, isFirst).collect {
+                updateInitList(it)
+                emit(PagePartialState.DataLoaded(it.toPageItem()))
+            }
         }
     }
 
@@ -57,38 +78,36 @@ class PageActor @Inject constructor(private var repo: IChannelRepository) :
         }
     }
 
-    private var currentQueryText: String = ""
     private fun sendQuery(queryText: String, subscribedOnly: Boolean): Flow<PagePartialState> {
         return flow {
             if (queryText != currentQueryText) {
                 currentQueryText = queryText
-                handleQuery(subscribedOnly, queryText)
+                getStreams(subscribedOnly, currentQueryText, false)
             }
         }
     }
 
-    private suspend fun FlowCollector<PagePartialState>.handleQuery(
-        subscribedOnly: Boolean,
-        queryText: String,
-    ) {
-        runCatching {
-            emit(PagePartialState.Loading)
-            if (subscribedOnly) {
-                repo.querySubscribedChannels(queryText)
-            } else {
-                repo.queryChannels(queryText)
-            }
-        }.fold(
-            onSuccess = {
-                updateInitList(it)
-                emit(PagePartialState.DataLoaded(it.toPageItem()))
-            },
-            onFailure = {
-                emit(PagePartialState.DataLoaded(emptyList()))
-                _effects.emit(PageEffect.ShowError(it))
-            }
-        )
-    }
+    /*    private suspend fun FlowCollector<PagePartialState>.handleQuery(
+            subscribedOnly: Boolean,
+            queryText: String,
+        ) {
+            runCatching {
+                if (subscribedOnly) {
+                    repo.querySubscribedChannels(queryText)
+                } else {
+                    repo.queryChannels(queryText)
+                }
+            }.fold(
+                onSuccess = {
+                    updateInitList(it)
+                    emit(PagePartialState.DataLoaded(it.toPageItem()))
+                },
+                onFailure = {
+                    emit(PagePartialState.DataLoaded(emptyList()))
+                    _effects.emit(PageEffect.ShowError(it))
+                }
+            )
+        }*/
 
     private fun updateInitList(it: List<ChannelUiModel>) {
         channelsList.clear()

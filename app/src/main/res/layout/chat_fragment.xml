@@ -36,12 +36,25 @@
         android:background="@color/background"
         android:paddingHorizontal="@dimen/padding_standard"
         android:paddingVertical="@dimen/padding_small"
+        android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@+id/chatScreenMessageLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar"
         tools:itemCount="7"
         tools:listitem="@layout/message_viewgroup_layout" />
+
+    <ImageView
+        android:id="@+id/shimmerImage"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/background"
+        android:src="@drawable/loading_animation"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/chatScreenMessageLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
     <LinearLayout
         android:id="@+id/chatScreenMessageLayout"

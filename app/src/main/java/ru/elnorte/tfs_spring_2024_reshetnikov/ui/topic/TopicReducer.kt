@@ -8,7 +8,7 @@ import javax.inject.Inject
 class TopicReducer @Inject constructor() : MviReducer<TopicPartialState, TopicState> {
     override fun reduce(prevState: TopicState, partialState: TopicPartialState): TopicState {
         return when (partialState) {
-            is TopicPartialState.DataLoaded -> updatePageInState(partialState.model)
+            is TopicPartialState.InitLoaded -> updatePageInState(partialState.model)
 
             is TopicPartialState.ActionButtonChanged -> updateActionButtonInState(
                 prevState,
@@ -18,7 +18,13 @@ class TopicReducer @Inject constructor() : MviReducer<TopicPartialState, TopicSt
             TopicPartialState.NoChanges -> prevState
             is TopicPartialState.MessagesLoaded -> messagesLoaded(prevState, partialState.model)
             is TopicPartialState.MessagesSent -> messageSent(prevState, partialState.messages)
+            TopicPartialState.Error -> errorHappened(prevState)
         }
+    }
+
+    private fun errorHappened(prevState: TopicState): TopicState {
+        return TopicError
+
     }
 
     private fun messageSent(prevState: TopicState, messages: List<MessageUiModel>): TopicState {
@@ -30,18 +36,18 @@ class TopicReducer @Inject constructor() : MviReducer<TopicPartialState, TopicSt
         }
     }
 
-    private fun messagesLoaded(prevState: TopicState, model: List<MessageUiModel>): TopicState {
+    private fun messagesLoaded(prevState: TopicState, model: List<MessageUiModel>): TopicState =
         if (prevState is TopicSuccess) {
             val data = prevState.data.copy(messages = model)
-            return TopicSuccess(data)
+            TopicSuccess(data)
+        } else {
+            prevState
         }
-        return prevState
-    }
 
     private fun updatePageInState(
         current: ChatUiModel,
     ): TopicState {
-        return TopicSuccess(current)
+        return TopicSuccess(current, true)
     }
 
     private fun updateActionButtonInState(prevState: TopicState, isSend: Boolean): TopicState {

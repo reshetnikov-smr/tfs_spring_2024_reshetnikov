@@ -1,8 +1,11 @@
 package ru.elnorte.tfs_spring_2024_reshetnikov.data.network.models
 
 
+import android.text.Html
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import ru.elnorte.tfs_spring_2024_reshetnikov.data.local.entities.MessageEntity
+import ru.elnorte.tfs_spring_2024_reshetnikov.data.local.entities.ReactionEntity
 
 /**
  * Response by request
@@ -85,3 +88,51 @@ data class User(
     val fullName: String, // Алексей Решетников
     val id: Int // 709775
 )
+
+
+fun MessagesResponse.asMessageEntity(
+    topicName: String,
+    streamId: Int
+): List<MessageEntity> {
+    val output = mutableListOf<MessageEntity>()
+    this.messages.forEach { messageResponse ->
+        output.add(
+            MessageEntity(
+                messageResponse.id,
+                messageResponse.timestamp,
+                messageResponse.senderId,
+                messageResponse.senderId == 709775,
+                messageResponse.avatarUrl,
+                messageResponse.senderFullName,
+
+                removeHtmlTags(messageResponse.content),
+                topicName,
+                streamId,
+            )
+        )
+    }
+    return output
+}
+
+fun MessagesResponse.asReactionEntity(): List<ReactionEntity> {
+    val reactions = mutableListOf<ReactionEntity>()
+    this.messages.forEach { messageResponse ->
+        messageResponse.reactions.forEach {
+            when (it.reactionType) {
+                "unicode_emoji" -> {
+                    if (!it.emojiCode.contains("-")) {
+                        reactions.add(ReactionEntity(it.emojiCode, it.userId, messageResponse.id))
+                    }
+                }
+
+                else -> Unit
+            }
+        }
+    }
+    return reactions
+}
+
+private fun removeHtmlTags(input: String): String {
+    return Html.fromHtml(input, Html.FROM_HTML_MODE_LEGACY).toString()
+        .replace(Regex("<.*?>"), "")
+}

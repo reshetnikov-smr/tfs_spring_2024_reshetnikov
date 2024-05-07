@@ -7,27 +7,37 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import ru.elnorte.tfs_spring_2024_reshetnikov.data.network.MessengerApiService
 import ru.elnorte.tfs_spring_2024_reshetnikov.data.network.models.GenericResponse
-import ru.elnorte.tfs_spring_2024_reshetnikov.data.network.models.MessageResponse
 import ru.elnorte.tfs_spring_2024_reshetnikov.data.network.models.MessageSendingResponse
+import ru.elnorte.tfs_spring_2024_reshetnikov.data.network.models.MessagesResponse
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.ResponseState
 import ru.elnorte.tfs_spring_2024_reshetnikov.ui.models.ResultUiState
 
 class ChatRemoteSourceImpl(private val api: MessengerApiService) : ChatRemoteSource {
 
-    override suspend fun getTopic(streamId: Int, topicName: String): List<MessageResponse> {
+    override suspend fun getTopic(
+        streamId: Int,
+        topicName: String,
+        listSize: Int,
+    ): ResponseState<MessagesResponse> {
         return withContext(Dispatchers.IO) {
-            val narrowJson =
-                "[{\"negated\":false,\"operator\":\"stream\",\"operand\":$streamId},{\"negated\":false,\"operator\":\"topic\",\"operand\":\"$topicName\"}]"
+            runCatching {
+                val narrowJson =
+                    "[{\"negated\":false,\"operator\":\"stream\",\"operand\":$streamId},{\"negated\":false,\"operator\":\"topic\",\"operand\":\"$topicName\"}]"
 
-            val call = api.getMessages(
-                "newest",
-                100,
-                0,
-                narrowJson
+                val call = api.getMessages(
+                    "newest",
+                    listSize,
+                    0,
+                    narrowJson
+                )
+
+                checkNotNull(call.execute().body()) {
+                    "messages is null"
+                }
+            }.fold(
+                onSuccess = { ResponseState.Success(it) },
+                onFailure = { ResponseState.Error(it.message.orEmpty()) }
             )
-            val response = call.execute()
-
-            response.body()?.messages.orEmpty()
         }
     }
 

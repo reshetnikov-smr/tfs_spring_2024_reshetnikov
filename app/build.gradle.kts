@@ -8,6 +8,7 @@ import Build_gradle.Versions.material
 import Build_gradle.Versions.moshi
 import Build_gradle.Versions.navigation
 import Build_gradle.Versions.retrofit
+import Build_gradle.Versions.room
 import Build_gradle.Versions.shimmer
 import Build_gradle.Versions.viewpager
 
@@ -32,6 +33,7 @@ object Versions {
     const val moshi = "1.15.0"
     const val glide = "4.16.0"
     const val dagger = "2.51.1"
+    const val room = "2.6.1"
 }
 
 android {
@@ -102,4 +104,10 @@ dependencies {
 
     implementation("com.google.dagger:dagger:$dagger")
     ksp("com.google.dagger:dagger-compiler:$dagger")
+
+    //room
+    implementation("androidx.room:room-runtime:$room")
+    annotationProcessor("androidx.room:room-compiler:$room")
+    ksp("androidx.room:room-compiler:$room")
+    implementation("androidx.room:room-ktx:$room")
 }

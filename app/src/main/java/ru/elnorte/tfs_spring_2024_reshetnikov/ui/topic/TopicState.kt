@@ -7,4 +7,6 @@ sealed class TopicState : MviState
 
 data class TopicSuccess(val data: ChatUiModel, val showLastMessage: Boolean = false) : TopicState()
 
-data object TopicLoading : TopicState()
+data object TopicInit : TopicState()
+
+data object TopicError : TopicState()

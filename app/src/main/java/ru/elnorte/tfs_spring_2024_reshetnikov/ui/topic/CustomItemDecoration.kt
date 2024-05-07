@@ -34,7 +34,7 @@ class CustomItemDecoration : RecyclerView.ItemDecoration() {
             val view = parent.getChildAt(i)
             val position = parent.getChildAdapterPosition(view!!)
             when {
-                position == RecyclerView.NO_POSITION -> {
+                position == RecyclerView.NO_POSITION || position >= list.size -> {
                     continue
                 }
 

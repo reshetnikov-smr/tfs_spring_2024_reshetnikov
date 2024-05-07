@@ -2,6 +2,8 @@ package ru.elnorte.tfs_spring_2024_reshetnikov.di.channels
 
 import dagger.Module
 import dagger.Provides
+import ru.elnorte.tfs_spring_2024_reshetnikov.data.local.ChannelLocalSourceImpl
+import ru.elnorte.tfs_spring_2024_reshetnikov.data.local.dao.ChannelDao
 import ru.elnorte.tfs_spring_2024_reshetnikov.data.network.MessengerApiService
 import ru.elnorte.tfs_spring_2024_reshetnikov.data.remote.ChannelRemoteSourceImpl
 import ru.elnorte.tfs_spring_2024_reshetnikov.data.repository.ChannelRepository
@@ -21,8 +23,8 @@ class ChannelModule {
 
     @Provides
     @MainAnnotation.ChannelScope
-    fun provideRepository(api: MessengerApiService): IChannelRepository {
-        return ChannelRepository(ChannelRemoteSourceImpl(api))
+    fun provideRepository(api: MessengerApiService, dao: ChannelDao): IChannelRepository {
+        return ChannelRepository(ChannelRemoteSourceImpl(api), ChannelLocalSourceImpl(dao))
     }
 
     @Provides
